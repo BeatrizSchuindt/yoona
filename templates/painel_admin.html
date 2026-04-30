@@ -1,0 +1,352 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="pt-br">
+<head>
+    <title>Painel Admin | Yoona Head Spa</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    
+    <!-- CSS original do template -->
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+    <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
+
+    <!-- CSS customizado para transformar o Dimension em um Dashboard -->
+    <style>
+        body.admin-dashboard {
+            background-color: #1b1f22;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            font-family: "Source Sans Pro", Helvetica, sans-serif;
+            color: #ffffff;
+        }
+
+        /* Barra Lateral (Sidebar) */
+        .sidebar {
+            width: 260px;
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            letter-spacing: 0.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav ul li a {
+            display: block;
+            padding: 1rem 2rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.1rem;
+            border-bottom: none;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav ul li a:hover,
+        .sidebar-nav ul li a.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #ffffff;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Área de Conteúdo Principal */
+        .main-content {
+            flex: 1;
+            margin-left: 260px; /* Compensa a sidebar fixa */
+            padding: 3rem;
+            background: transparent;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* Ajustes das tabelas para o Dashboard */
+        .admin-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h3 {
+            margin: 0;
+        }
+
+        /* Responsividade */
+        @media screen and (max-width: 980px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+                padding: 2rem;
+            }
+        }
+
+        @media screen and (max-width: 736px) {
+            body.admin-dashboard {
+                flex-direction: column;
+            }
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="is-preload admin-dashboard">
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span class="icon fa-gem"></span>
+            <h2>YOONA SPA</h2>
+            <p>Painel do Gestor</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#" class="active"><span class="icon solid fa-chart-line" style="margin-right: 10px;"></span> Visão Geral</a></li>
+                <li><a href="#gestao-servicos"><span class="icon solid fa-spa" style="margin-right: 10px;"></span> Serviços</a></li>
+                <li><a href="#gestao-cupons"><span class="icon solid fa-ticket-alt" style="margin-right: 10px;"></span> Cupons/Vouchers</a></li>
+                <li><a href="#relatorios-comissao"><span class="icon solid fa-file-invoice-dollar" style="margin-right: 10px;"></span> Comissões</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="button small">Sair do Sistema</a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="main-content">
+        
+        <div class="dashboard-header">
+            <h1>Painel Administrativo</h1>
+            <p>Bem-vindo(a), Alberto Sales</p>
+        </div>
+
+        <!-- SEÇÃO 1: GESTÃO DE SERVIÇOS -->
+        <section id="gestao-servicos" class="admin-section">
+            <div class="section-header">
+                <h3>Catálogo de Serviços</h3>
+                <a href="#" class="button primary small icon solid fa-plus">Novo Serviço</a>
+            </div>
+            <p>Cadastre, atualize e remova as terapias oferecidas no catálogo do spa.</p>
+            
+            <div class="table-wrapper">
+                <table class="alt">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome do Tratamento</th>
+                            <th>Duração Estimada</th>
+                            <th>Preço Base</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados dinâmicos do Django virão aqui -->
+                        <tr>
+                            <td>1</td>
+                            <td>Detox Capilar</td>
+                            <td>60 min</td>
+                            <td>R$ 150,00</td>
+                            <td>
+                                <ul class="actions small">
+                                    <li><a href="#" class="button small">Editar</a></li>
+                                    <li><a href="#" class="button small">Excluir</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Terapia Relaxante VIP</td>
+                            <td>90 min</td>
+                            <td>R$ 220,00</td>
+                            <td>
+                                <ul class="actions small">
+                                    <li><a href="#" class="button small">Editar</a></li>
+                                    <li><a href="#" class="button small">Excluir</a></li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: GESTÃO DE VOUCHERS E CUPONS -->
+        <section id="gestao-cupons" class="admin-section">
+            <div class="section-header">
+                <h3>Gerenciar Vouchers</h3>
+                <a href="#" class="button primary small icon solid fa-plus">Novo Cupom</a>
+            </div>
+            <p>Controle de códigos promocionais e vales-presente, seus limites de uso e status.</p>
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código Promocional</th>
+                            <th>Desconto</th>
+                            <th>Limite de Uso</th>
+                            <th>Utilizados</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados dinâmicos do Django virão aqui -->
+                        <tr>
+                            <td><strong>BEMVINDO10</strong></td>
+                            <td>10%</td>
+                            <td>100</td>
+                            <td>45</td>
+                            <td style="color: #4CAF50;">Ativo</td>
+                            <td><a href="#" class="button small">Desativar</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>INVERNO50</strong></td>
+                            <td>R$ 50,00</td>
+                            <td>20</td>
+                            <td>20</td>
+                            <td style="color: #F44336;">Excedido</td>
+                            <td><a href="#" class="button small disabled">Editar</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: RELATÓRIOS DE COMISSÃO -->
+        <section id="relatorios-comissao" class="admin-section">
+            <div class="section-header">
+                <h3>Histórico de Comissões</h3>
+                <a href="#" class="button small icon solid fa-download">Exportar Relatório</a>
+            </div>
+            <p>Registros imutáveis gerados automaticamente após a conclusão dos atendimentos.</p>
+            
+            <div class="table-wrapper">
+                <table class="alt">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Agendamento (ID)</th>
+                            <th>Terapeuta</th>
+                            <th>Valor Final Pago</th>
+                            <th>Comissão (Taxa)</th>
+                            <th>Valor da Comissão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados dinâmicos do Django virão aqui -->
+                        <tr>
+                            <td>04/05/2026 14:30</td>
+                            <td>#AG-1042</td>
+                            <td>Maria Clara</td>
+                            <td>R$ 135,00 (c/ desconto)</td>
+                            <td>20%</td>
+                            <td style="color: #4CAF50;"><strong>R$ 27,00</strong></td>
+                        </tr>
+                        <tr>
+                            <td>04/05/2026 16:00</td>
+                            <td>#AG-1043</td>
+                            <td>João Silva</td>
+                            <td>R$ 220,00</td>
+                            <td>25%</td>
+                            <td style="color: #4CAF50;"><strong>R$ 55,00</strong></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" style="text-align: right;"><strong>Total Período:</strong></td>
+                            <td><strong>R$ 82,00</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Fundo estético igual ao original -->
+    <div id="bg"></div>
+
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/js/browser.min.js' %}"></script>
+    <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+    <script src="{% static 'assets/js/util.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+</html>
