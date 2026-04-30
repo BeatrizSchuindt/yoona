@@ -61,42 +61,30 @@
                         <!-- Aba 2: Catálogo -->
                         <article id="catalogo">
                                 <h2 class="major">Catálogo de Serviços</h2>
-                                <span class="image main"><img src="{% static 'images/pic02.jpg' %}" alt="[Cliente recebendo tratamento capilar relaxante no lavatório]" /></span>
                                 <p>Conheça nossas terapias focadas no seu bem-estar. Escolha o serviço ideal para o seu momento:</p>
                                 
                                 <section>
-                                    <div class="table-wrapper">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Serviço</th>
-                                                    <th>Descrição</th>
-                                                    <th>Duração</th>
-                                                    <th>Preço Base</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>Detox Capilar</td>
-                                                    <td>Limpeza profunda e esfoliação do couro cabeludo com óleos essenciais.</td>
-                                                    <td>60 min</td>
-                                                    <td>R$ 150,00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Terapia Relaxante VIP</td>
-                                                    <td>Massagem craniana, aromaterapia e hidratação profunda dos fios.</td>
-                                                    <td>90 min</td>
-                                                    <td>R$ 220,00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Revitalização Yoona</td>
-                                                    <td>Tratamento para controle de oleosidade e fortalecimento capilar.</td>
-                                                    <td>60 min</td>
-                                                    <td>R$ 180,00</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    {% for terapia in terapias %}
+                                        <div style="margin-bottom: 3rem;">
+                                            
+                                            <h3 class="major" style="margin-bottom: 0rem;">{{ terapia.nome }}</h3>
+                                            
+                                            {% if terapia.imagem %}
+                                                <span class="image main" style="margin-bottom: 1rem;">
+                                                    <img src="{{ terapia.imagem.url }}" alt="{{ terapia.nome }}" style="max-height: 350px; object-fit: cover;" />
+                                                </span>
+                                            {% endif %}
+                                            
+                                            <p style="margin-bottom: 1rem;">{{ terapia.descricao }}</p>
+                                            
+                                            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 1rem;  margin-top: 0;">
+                                                <span><strong>Duração:</strong> {{ terapia.duracao }} min</span>
+                                                <span><strong>Valor: </strong> R$ {{ terapia.preco_base }}</span>
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <p>Nenhuma terapia disponível no momento.</p>
+                                    {% endfor %}
                                 </section>
                         </article>
 
