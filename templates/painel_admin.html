@@ -1,337 +1,265 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Painel Admin | Yoona Head Spa{% endblock title %}
+{% block title %}Gestão de Terapias | Yoona Head Spa{% endblock title %}
 
 {% block body_class %}admin-dashboard{% endblock body_class %}
 
 {% block extra_css %}
-<!-- CSS customizado para transformar o Dimension em um Dashboard -->
 <style>
+    /* RESET E ESTRUTURA BASE */
+    #bg { display: none !important; }
+    
     body.admin-dashboard {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: flex !important;
         background-color: #1b1f22;
         margin: 0;
         padding: 0;
-        display: flex;
         min-height: 100vh;
         font-family: "Source Sans Pro", Helvetica, sans-serif;
         color: #ffffff;
+        transition: all 0.3s ease;
     }
 
-    /* Barra Lateral (Sidebar) */
     .sidebar {
         width: 260px;
-        background: rgba(0, 0, 0, 0.3);
+        background: #0d1012;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         display: flex;
         flex-direction: column;
         position: fixed;
         height: 100vh;
-        overflow-y: auto;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        left: 0; 
+    }
+
+    .close-sidebar {
+        display: none;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1001;
+        transition: color 0.3s ease;
+    }
+    
+    .close-sidebar:hover {
+        color: #ff4d4d;
     }
 
     .sidebar-header {
-        padding: 2rem 1.5rem;
+        padding: 2rem 1rem;
         text-align: center;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        white-space: nowrap;
+        position: relative;
     }
 
-    .sidebar-header .icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
+    .sidebar-header h2 { margin: 10px 0 5px 0; }
+    .sidebar-header p { margin: 0; font-size: 0.9rem; color: #aaaaaa; }
 
-    .sidebar-header h2 {
-        font-size: 1.2rem;
-        letter-spacing: 0.2rem;
-        margin: 0;
-    }
-
-    .sidebar-header p {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.5);
-        margin: 0;
-    }
-
-    .sidebar-nav {
-        flex: 1;
-        padding: 2rem 0;
-    }
-
-    .sidebar-nav ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
+    .sidebar-nav { flex: 1; padding: 2rem 0; }
+    .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
     .sidebar-nav ul li a {
-        display: block;
-        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
         color: rgba(255, 255, 255, 0.6);
         text-decoration: none;
         font-weight: 600;
-        letter-spacing: 0.1rem;
-        border-bottom: none;
         transition: all 0.2s ease;
     }
 
-    .sidebar-nav ul li a:hover,
-    .sidebar-nav ul li a.active {
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.05);
-        border-left: 4px solid #ffffff;
-    }
-
-    .sidebar-footer {
-        padding: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    .sidebar-nav ul li a .icon {
+        font-size: 1.2rem;
+        min-width: 50px;
         text-align: center;
     }
 
-    /* Área de Conteúdo Principal */
+    .sidebar-nav ul li a:hover, .sidebar-nav ul li a.active {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 4px solid #ffffff;
+    }
+
+    /* CONTEÚDO PRINCIPAL */
     .main-content {
         flex: 1;
-        margin-left: 260px; /* Compensa a sidebar fixa */
-        padding: 3rem;
-        background: transparent;
+        margin-left: 260px;
+        padding: 2rem 3rem;
+        transition: all 0.3s ease;
     }
+
+    /* BOTÃO TOGGLE (HAMBÚRGUER) */
+    .menu-toggle {
+        display: none; 
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-right: 1.5rem;
+        transition: background 0.3s;
+    }
+
+    .menu-toggle:hover { background: rgba(255,255,255,0.1); }
 
     .dashboard-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding-bottom: 1rem;
     }
 
-    .dashboard-header h1 {
-        margin: 0;
-        font-size: 1.8rem;
-    }
-
-    /* Ajustes das tabelas para o Dashboard */
-    .admin-section {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-        padding: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .section-header h3 {
-        margin: 0;
-    }
-
-    /* Responsividade */
+    /* RESPONSIVIDADE (TABLETS E CELULARES) */
     @media screen and (max-width: 980px) {
-        .sidebar {
-            width: 200px;
+        .menu-toggle { display: inline-block; }
+        .sidebar { width: 80px; }
+        .main-content { margin-left: 80px; padding: 2rem; }
+        
+        .sidebar-header h2, .sidebar-header p, .sidebar-nav ul li a span:not(.icon) {
+            display: none;
         }
-        .main-content {
-            margin-left: 200px;
-            padding: 2rem;
+
+        /* Menu aberto */
+        body.sidebar-open .sidebar { width: 260px; }
+        body.sidebar-open .main-content { margin-left: 260px; }
+        
+        /* Ajuste para ficarem um embaixo do outro */
+        body.sidebar-open .sidebar-header h2, 
+        body.sidebar-open .sidebar-header p {
+            display: block; 
+            white-space: normal;
+        }
+        
+        body.sidebar-open .sidebar-nav ul li a span:not(.icon) {
+            display: inline-block;
+        }
+        
+        /* Mostra o botão de fechar quando o menu estiver aberto */
+        body.sidebar-open .close-sidebar {
+            display: block;
         }
     }
 
     @media screen and (max-width: 736px) {
-        body.admin-dashboard {
-            flex-direction: column;
-        }
-        .sidebar {
-            position: relative;
-            width: 100%;
-            height: auto;
-            border-right: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .main-content {
-            margin-left: 0;
-            padding: 1.5rem;
-        }
+        .sidebar { left: -260px; width: 260px; }
+        .main-content { margin-left: 0; padding: 1.5rem; }
+        
+        body.sidebar-open .sidebar { left: 0; }
+        body.sidebar-open .main-content { margin-left: 0; }
     }
+
+    /* Estilo das Tabelas e Badges */
+    .admin-section { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; padding: 2rem; margin-bottom: 3rem; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+    .badge-active { background-color: #28a745; color: #fff; }
+    .badge-inactive { background-color: #6c757d; color: #fff; }
 </style>
 {% endblock extra_css %}
 
 {% block content %}
-<!-- BARRA LATERAL -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+    <button class="close-sidebar" id="close-btn" aria-label="Fechar menu">
+        <i class="fas fa-times"></i>
+    </button>
+
     <div class="sidebar-header">
         <span class="icon fa-gem"></span>
         <h2>YOONA SPA</h2>
-        <p>Painel do Gestor</p>
+        <p>Acesso Admin</p>
+        <div style="text-align: center;">
+            <p style="margin: 0; font-size: 0.9rem;"><strong>{{ user.username }}</strong></p>
+        </div>
     </div>
-    
     <nav class="sidebar-nav">
         <ul>
-            <li><a href="#" class="active"><span class="icon solid fa-chart-line" style="margin-right: 10px;"></span> Visão Geral</a></li>
-            <li><a href="#gestao-servicos"><span class="icon solid fa-spa" style="margin-right: 10px;"></span> Serviços</a></li>
-            <li><a href="#gestao-cupons"><span class="icon solid fa-ticket-alt" style="margin-right: 10px;"></span> Cupons/Vouchers</a></li>
-            <li><a href="#relatorios-comissao"><span class="icon solid fa-file-invoice-dollar" style="margin-right: 10px;"></span> Comissões</a></li>
+            <li><a href="{% url 'servicos:painel_admin' %}" class="active"><span class="icon solid fa-spa"></span><span> Serviços</span></a></li>
+            <li><a href="#"><span class="icon solid fa-ticket-alt"></span><span> Vouchers</span></a></li>
+            <li><a href="#"><span class="icon solid fa-file-invoice-dollar"></span><span> Comissões</span></a></li>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 1rem 0;">
+            <li><a href="{% url 'logout' %}"><span class="icon solid fa-sign-out-alt"></span><span> Sair</span></a></li>
         </ul>
     </nav>
-
-    <div class="sidebar-footer">
-        <a href="{% url 'logout' %}" class="button small">Sair do Sistema</a>
-    </div>
 </aside>
 
-<!-- CONTEÚDO PRINCIPAL -->
 <main class="main-content">
-    
     <div class="dashboard-header">
-        <h1>Painel Administrativo</h1>
-        <p>Bem-vindo(a), Alberto Sales</p>
+        <button class="menu-toggle" id="toggle-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 style="flex: 1; margin: 0;">Gestão de Terapias</h1>
     </div>
 
-    <!-- SEÇÃO 1: GESTÃO DE SERVIÇOS -->
     <section id="gestao-servicos" class="admin-section">
-        <div class="section-header">
-            <h3>Catálogo de Serviços</h3>
-            <a href="#" class="button primary small icon solid fa-plus">Novo Serviço</a>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0;">Catálogo de Terapias</h3>
+            <a href="{% url 'servicos:nova_terapia' %}" class="button primary small icon solid fa-plus">Nova Terapia</a>
         </div>
-        <p>Cadastre, atualize e remova as terapias oferecidas no catálogo do spa.</p>
         
         <div class="table-wrapper">
             <table class="alt">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nome do Tratamento</th>
-                        <th>Duração Estimada</th>
-                        <th>Preço Base</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dados dinâmicos do Django virão aqui -->
-                    <tr>
-                        <td>1</td>
-                        <td>Detox Capilar</td>
-                        <td>60 min</td>
-                        <td>R$ 150,00</td>
-                        <td>
-                            <ul class="actions small">
-                                <li><a href="#" class="button small">Editar</a></li>
-                                <li><a href="#" class="button small">Excluir</a></li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Terapia Relaxante VIP</td>
-                        <td>90 min</td>
-                        <td>R$ 220,00</td>
-                        <td>
-                            <ul class="actions small">
-                                <li><a href="#" class="button small">Editar</a></li>
-                                <li><a href="#" class="button small">Excluir</a></li>
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- SEÇÃO 2: GESTÃO DE VOUCHERS E CUPONS -->
-    <section id="gestao-cupons" class="admin-section">
-        <div class="section-header">
-            <h3>Gerenciar Vouchers</h3>
-            <a href="#" class="button primary small icon solid fa-plus">Novo Cupom</a>
-        </div>
-        <p>Controle de códigos promocionais e vales-presente, seus limites de uso e status.</p>
-        
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código Promocional</th>
-                        <th>Desconto</th>
-                        <th>Limite de Uso</th>
-                        <th>Utilizados</th>
+                        <th>Nome</th>
+                        <th>Duração</th>
+                        <th>Preço</th>
                         <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dados dinâmicos do Django virão aqui -->
+                    {% for servico in terapias_admin %}
                     <tr>
-                        <td><strong>BEMVINDO10</strong></td>
-                        <td>10%</td>
-                        <td>100</td>
-                        <td>45</td>
-                        <td style="color: #4CAF50;">Ativo</td>
-                        <td><a href="#" class="button small">Desativar</a></td>
+                        <td><strong>{{ servico.nome }}</strong></td>
+                        <td>{{ servico.duracao }} min</td>
+                        <td>R$ {{ servico.preco_base }}</td>
+                        <td>
+                            <span class="badge {% if servico.ativo %}badge-active{% else %}badge-inactive{% endif %}">
+                                {{ servico.ativo|yesno:"Ativo,Inativo" }}
+                            </span>
+                        </td>
+                        <td>
+                            <ul class="actions small">
+                                <li><a href="#" class="button small">Editar</a></li>
+                                <li><a href="#" class="button small">Excluir</a></li>
+                            </ul>
+                        </td>
                     </tr>
-                    <tr>
-                        <td><strong>INVERNO50</strong></td>
-                        <td>R$ 50,00</td>
-                        <td>20</td>
-                        <td>20</td>
-                        <td style="color: #F44336;">Excedido</td>
-                        <td><a href="#" class="button small disabled">Editar</a></td>
-                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align: center;">Nenhuma terapia cadastrada.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </section>
-
-    <!-- SEÇÃO 3: RELATÓRIOS DE COMISSÃO -->
-    <section id="relatorios-comissao" class="admin-section">
-        <div class="section-header">
-            <h3>Histórico de Comissões</h3>
-            <a href="#" class="button small icon solid fa-download">Exportar Relatório</a>
-        </div>
-        <p>Registros imutáveis gerados automaticamente após a conclusão dos atendimentos.</p>
-        
-        <div class="table-wrapper">
-            <table class="alt">
-                <thead>
-                    <tr>
-                        <th>Data/Hora</th>
-                        <th>Agendamento (ID)</th>
-                        <th>Terapeuta</th>
-                        <th>Valor Final Pago</th>
-                        <th>Comissão (Taxa)</th>
-                        <th>Valor da Comissão</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dados dinâmicos do Django virão aqui -->
-                    <tr>
-                        <td>04/05/2026 14:30</td>
-                        <td>#AG-1042</td>
-                        <td>Maria Clara</td>
-                        <td>R$ 135,00 (c/ desconto)</td>
-                        <td>20%</td>
-                        <td style="color: #4CAF50;"><strong>R$ 27,00</strong></td>
-                    </tr>
-                    <tr>
-                        <td>04/05/2026 16:00</td>
-                        <td>#AG-1043</td>
-                        <td>João Silva</td>
-                        <td>R$ 220,00</td>
-                        <td>25%</td>
-                        <td style="color: #4CAF50;"><strong>R$ 55,00</strong></td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="5" style="text-align: right;"><strong>Total Período:</strong></td>
-                        <td><strong>R$ 82,00</strong></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </section>
-
 </main>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+    const toggleBtn = document.getElementById('toggle-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const body = document.body;
+
+    toggleBtn.addEventListener('click', () => {
+        body.classList.add('sidebar-open');
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            body.classList.remove('sidebar-open');
+        });
+    }
+</script>
+{% endblock extra_js %}

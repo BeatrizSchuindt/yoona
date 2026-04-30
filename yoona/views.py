@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 def direcionar_usuario(request):
     """Verifica o tipo de usuário e envia para o painel correto."""
     if request.user.is_staff or request.user.is_superuser:
-        return redirect('painel_admin')
+        return redirect('servicos:painel_admin')
     else:
         # Se não é staff, assumimos que é um Terapeuta
         return redirect('painel_terapeuta')
@@ -20,7 +20,7 @@ def is_admin(user):
 @user_passes_test(is_admin, login_url='/login/') # Só Admin acessa
 def painel_admin(request):
     # Aqui depois buscaremos as Terapias para a listagem
-    return render(request, 'painel_admin.html')
+    return redirect('servicos:painel_admin')
 
 @login_required # Terapeutas acessam
 def painel_terapeuta(request):
