@@ -7,7 +7,6 @@
 
 {% block extra_css %}
 <style>
-    /* Esconde o fundo padrão do base.html para esta página específica */
     #bg { display: none !important; }
 
     body.login-page {
@@ -15,20 +14,15 @@
         padding: 0;
         display: flex;
         height: 100vh;
-        background-color: #1b1f22; /* Cor de fundo escura combinando com o template */
+        background-color: #1b1f22;
         font-family: "Source Sans Pro", Helvetica, sans-serif;
     }
 
-    .login-wrapper {
-        display: flex;
-        width: 100%;
-        height: 100%;
-    }
+    .login-wrapper { display: flex; width: 100%; height: 100%; }
 
-    /* Lado esquerdo: Imagem do Spa */
     .login-image-side {
         flex: 1;
-        display: none; /* Esconde em telas pequenas */
+        display: none;
         background-color: #000;
         position: relative;
         overflow: hidden;
@@ -38,10 +32,9 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.7; /* Escurece um pouco a imagem para ficar elegante */
+        opacity: 0.7;
     }
 
-    /* Lado direito: Formulário */
     .login-form-side {
         flex: 1;
         display: flex;
@@ -53,15 +46,9 @@
         color: #ffffff;
     }
 
-    .login-form-container {
-        width: 100%;
-        max-width: 400px; /* Mantém o formulário num tamanho agradável */
-    }
+    .login-form-container { width: 100%; max-width: 400px; }
 
-    .login-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
+    .login-header { text-align: center; margin-bottom: 2rem; }
 
     .login-header h2 {
         font-size: 2rem;
@@ -76,7 +63,6 @@
         margin: 0;
     }
 
-    /* Ajustes dos campos de formulário para herdar do template base */
     .login-form-container .fields {
         display: flex;
         flex-direction: column;
@@ -119,41 +105,33 @@
         border-bottom-color: transparent;
     }
 
-    .btn-login {
-        width: 100%;
-        text-align: center;
-    }
+    .btn-login { width: 100%; text-align: center; }
 
-    /* Responsividade */
     @media screen and (min-width: 736px) {
-        .login-image-side {
-            display: block; /* Mostra a imagem em telas maiores que mobile */
-        }
+        .login-image-side { display: block; }
     }
 </style>
 {% endblock extra_css %}
 
 {% block content %}
 <div class="login-wrapper">
-    
-    <!-- Lado da Imagem (Oculto no celular, visível no Desktop) -->
     <div class="login-image-side">
-        <img src="{% static 'images/login-bg.jpg' %}" alt="[Imagem vertical e relaxante mostrando um detalhe do ambiente interno do Yoona Head Spa, como a sala de terapias ou produtos essenciais]" />
+        <!-- Lembre-se de colocar uma imagem real chamada login-bg.jpg na sua pasta static/images/ -->
+        <img src="{% static 'images/login-bg.jpg' %}" alt="Detalhe do ambiente relaxante do Yoona Head Spa" />
     </div>
 
-    <!-- Lado do Formulário -->
     <div class="login-form-side">
         <div class="login-form-container">
-            
             <div class="login-header">
                 <span class="icon fa-gem" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></span>
                 <h2>Yoona Spa</h2>
                 <p>Acesso da Equipe</p>
             </div>
 
-            <!-- Formulário de Login do Django -->
             <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}
+                
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
                 
                 <div class="fields">
                     <div class="field">
@@ -168,6 +146,8 @@
                 </div>
 
                 <div class="form-options">
+                    <!-- Nota de Sênior: O checkbox 'remember_me' requereria uma lógica extra na View para alterar a expiração da sessão, 
+                         mas vamos manter no HTML por motivos de design por enquanto -->
                     <div class="field">
                         <input type="checkbox" id="remember_me" name="remember_me">
                         <label for="remember_me">Lembrar-me</label>
@@ -181,11 +161,12 @@
                     </li>
                 </ul>
                 
-                <!-- Mensagens de erro do Django (credenciais inválidas, etc) -->
                 {% if form.errors %}
-                    <p style="color: #ff6b6b; font-size: 0.85rem; text-align: center; margin-top: 1rem;">
-                        Usuário ou senha incorretos. Tente novamente.
-                    </p>
+                    <div style="background-color: rgba(255, 107, 107, 0.1); border-left: 4px solid #ff6b6b; padding: 10px; margin-top: 1rem;">
+                        <p style="color: #ff6b6b; font-size: 0.85rem; text-align: center; margin: 0;">
+                            Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.
+                        </p>
+                    </div>
                 {% endif %}
 
             </form>
