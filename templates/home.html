@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Yoona Head Spa</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+        <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
+        <style>
+            @media screen and (min-width: 737px) {
+                #header nav ul li {
+                    flex: 1 1 25%;
+                    max-width: 25%;
+                }
+                
+                #header nav ul li a {
+                    font-size: 0.75rem;      
+                    letter-spacing: 0.1rem;  
+                    padding-left: 0.5rem;
+                    padding-right: 0.5rem; 
+                }
+            }
+        </style>
+    </head>
+    <body class="is-preload">
+
+        <div id="wrapper">
+
+                <header id="header">
+                        <div class="logo">
+                            <span class="icon fa-gem"></span>
+                        </div>
+                        <div class="content">
+                            <div class="inner">
+                                <h1>Yoona Head Spa</h1>
+                                <p>Relaxe, renove e cuide da sua saúde capilar.<br />
+                                O refúgio perfeito para o seu bem-estar físico e mental.</p>
+                            </div>
+                        </div>
+                        <nav>
+                            <ul>
+                                <li><a href="#sobre">Sobre</a></li>
+                                <li><a href="#catalogo">Catálogo</a></li>
+                                <li><a href="#agendamento">Agendar</a></li>
+                                <li><a href="#localizacao">Localização</a></li>
+                            </ul>
+                        </nav>
+                    </header>
+
+                <div id="main">
+
+                        <!-- Aba 1: Sobre o Head Spa -->
+                        <article id="sobre">
+                                <h2 class="major">Sobre o Head Spa</h2>
+                                <span class="image main"><img src="{% static 'images/pic01.jpg' %}" alt="[Recepção acolhedora e relaxante do Yoona Head Spa]" /></span>
+                                <p>Bem-vindo ao <strong>Yoona Head Spa</strong>. Somos um espaço dedicado exclusivamente à terapia capilar e ao relaxamento profundo. Nosso objetivo é proporcionar um momento de desconexão da rotina, cuidando não apenas da estética, mas da saúde real do seu couro cabeludo e fios.</p>
+                                <p>Nossos terapeutas especializados utilizam técnicas de massagem, aromaterapia e produtos de alta qualidade para aliviar o estresse, melhorar a circulação e promover um equilíbrio perfeito. Descubra uma nova forma de se cuidar em um ambiente preparado para acolher você.</p>
+                        </article>
+
+                        <!-- Aba 2: Catálogo -->
+                        <article id="catalogo">
+                                <h2 class="major">Catálogo de Serviços</h2>
+                                <span class="image main"><img src="{% static 'images/pic02.jpg' %}" alt="[Cliente recebendo tratamento capilar relaxante no lavatório]" /></span>
+                                <p>Conheça nossas terapias focadas no seu bem-estar. Escolha o serviço ideal para o seu momento:</p>
+                                
+                                <section>
+                                    <div class="table-wrapper">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Serviço</th>
+                                                    <th>Descrição</th>
+                                                    <th>Duração</th>
+                                                    <th>Preço Base</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Detox Capilar</td>
+                                                    <td>Limpeza profunda e esfoliação do couro cabeludo com óleos essenciais.</td>
+                                                    <td>60 min</td>
+                                                    <td>R$ 150,00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Terapia Relaxante VIP</td>
+                                                    <td>Massagem craniana, aromaterapia e hidratação profunda dos fios.</td>
+                                                    <td>90 min</td>
+                                                    <td>R$ 220,00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Revitalização Yoona</td>
+                                                    <td>Tratamento para controle de oleosidade e fortalecimento capilar.</td>
+                                                    <td>60 min</td>
+                                                    <td>R$ 180,00</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                        </article>
+
+                        <!-- Aba 3: Agendamento -->
+                        <article id="agendamento">
+                                <h2 class="major">Agendamento</h2>
+                                <span class="image main"><img src="{% static 'images/pic03.jpg' %}" alt="[Pessoa acessando o celular para fazer o agendamento online]" /></span>
+                                <p>Pensando na sua comodidade, nosso sistema de agendamento é 100% focado em praticidade. <strong>Não exigimos a criação de contas ou senhas!</strong></p>
+                                <p>Basta inserir o seu CPF para se identificar, escolher o melhor horário disponível na agenda de nossos terapeutas e confirmar a sua reserva. Imediatamente após a confirmação, você preencherá uma rápida <strong>Ficha de Anamnese digital</strong> para que possamos personalizar o seu atendimento de acordo com o seu histórico de saúde capilar.</p>
+                                
+                                <ul class="actions">
+                                    <li><a href="#iniciar-agendamento" class="button primary">Agendar Agora</a></li>
+                                </ul>
+                        </article>
+
+                        <!-- Aba 4: Localização e Contato -->
+                        <article id="localizacao">
+                                <h2 class="major">Localização</h2>
+                                <p>Venha viver a experiência Yoona. Estamos localizados em um ambiente preparado para oferecer o máximo de tranquilidade.</p>
+                                <p><strong>Endereço:</strong> Avenida do Bem-Estar, 123 - Centro, Cuiabá - MT<br>
+                                <strong>Horário de Funcionamento:</strong> Terça a Sábado, das 09h às 19h.</p>
+                                
+                                <h3 class="major">Fale Conosco</h3>
+                                <form method="post" action="#">
+                                    <div class="fields">
+                                        <div class="field half">
+                                            <label for="name">Nome</label>
+                                            <input type="text" name="name" id="name" />
+                                        </div>
+                                        <div class="field half">
+                                            <label for="email">E-mail</label>
+                                            <input type="email" name="email" id="email" />
+                                        </div>
+                                        <div class="field">
+                                            <label for="message">Mensagem</label>
+                                            <textarea name="message" id="message" rows="4"></textarea>
+                                        </div>
+                                    </div>
+                                    <ul class="actions">
+                                        <li><input type="submit" value="Enviar Mensagem" class="primary" /></li>
+                                        <li><input type="reset" value="Limpar" /></li>
+                                    </ul>
+                                </form>
+                                <ul class="icons">
+                                    <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                                    <li><a href="#" class="icon brands fa-whatsapp"><span class="label">WhatsApp</span></a></li>
+                                    <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                                </ul>
+                        </article>
+
+                    </div>
+
+                <footer id="footer">
+                        <p class="copyright">&copy; Yoona Head Spa. Desenvolvido por Ana Beatriz Schuindt. Design original: <a href="https://html5up.net">HTML5 UP</a>.</p>
+                    </footer>
+
+            </div>
+
+        <div id="bg"></div>
+
+        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+            <script src="{% static 'assets/js/browser.min.js' %}"></script>
+            <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+            <script src="{% static 'assets/js/util.js' %}"></script>
+            <script src="{% static 'assets/js/main.js' %}"></script>
+
+    </body>
+</html>
