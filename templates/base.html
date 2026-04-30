@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="pt-br">
+<head>
+    <title>{% block title %}Yoona Head Spa{% endblock title %}</title>
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    
+    <!-- CSS original do template Dimension -->
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+    <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
+
+    {% block extra_css %}{% endblock extra_css %}
+</head>
+
+<body class="is-preload {% block body_class %}{% endblock body_class %}">
+
+    
+    {% block content %}
+    {% endblock content %}
+
+    <div id="bg"></div>
+
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/js/browser.min.js' %}"></script>
+    <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+    <script src="{% static 'assets/js/util.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock extra_js %}
+
+</body>
+</html>

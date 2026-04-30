@@ -1,238 +1,224 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE HTML>
-<html lang="pt-br">
-<head>
-    <title>Ficha de Anamnese | Yoona Head Spa</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    
-    <!-- CSS original do template -->
-    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-    <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
 
-    <style>
-        body.anamnese-page {
-            background-color: #1b1f22;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: "Source Sans Pro", Helvetica, sans-serif;
-            color: #ffffff;
-        }
+{% block title %}Ficha de Anamnese | Yoona Head Spa{% endblock title %}
 
-        .anamnese-wrapper {
-            width: 100%;
-            max-width: 650px;
-            padding: 2.5rem;
-            margin: 2rem;
-            background: rgba(27, 31, 34, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-        }
+{% block body_class %}anamnese-page{% endblock body_class %}
 
-        .anamnese-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 1.5rem;
-        }
+{% block extra_css %}
+<style>
+    body.anamnese-page {
+        background-color: #1b1f22;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: "Source Sans Pro", Helvetica, sans-serif;
+        color: #ffffff;
+    }
 
-        .anamnese-header .icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-            color: #4CAF50; /* Destaque verde para remeter à saúde/bem-estar */
-        }
+    .anamnese-wrapper {
+        width: 100%;
+        max-width: 650px;
+        padding: 2.5rem;
+        margin: 2rem;
+        background: rgba(27, 31, 34, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+    }
 
-        .anamnese-header h1 {
-            font-size: 1.8rem;
-            letter-spacing: 0.1rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-        }
+    .anamnese-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1.5rem;
+    }
 
-        .anamnese-header p {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 0;
-        }
+    .anamnese-header .icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        color: #4CAF50; /* Destaque verde para remeter à saúde/bem-estar */
+    }
 
-        .fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-        }
+    .anamnese-header h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.1rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
 
-        .field {
-            flex: 1 1 100%;
-        }
+    .anamnese-header p {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+    }
 
-        label {
-            font-size: 0.85rem;
-            color: #ffffff;
-            font-weight: bold;
-            letter-spacing: 0.05rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
+    .fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
 
-        .help-text {
-            display: block;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: -0.3rem;
-            margin-bottom: 0.5rem;
-        }
+    .field {
+        flex: 1 1 100%;
+    }
 
-        input[type="text"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: solid 1px rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border-radius: 4px;
-            font-family: inherit;
-        }
+    label {
+        font-size: 0.85rem;
+        color: #ffffff;
+        font-weight: bold;
+        letter-spacing: 0.05rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: #ffffff;
-            outline: none;
-            background: rgba(255, 255, 255, 0.08);
-        }
+    .help-text {
+        display: block;
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: -0.3rem;
+        margin-bottom: 0.5rem;
+    }
 
-        select option {
-            background-color: #1b1f22;
-            color: #ffffff;
-        }
+    input[type="text"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: solid 1px rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        border-radius: 4px;
+        font-family: inherit;
+    }
 
-        /* LGPD Box */
-        .lgpd-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 4px;
-            margin-top: 2rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
+    input:focus, select:focus, textarea:focus {
+        border-color: #ffffff;
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+    }
 
-        .lgpd-box input[type="checkbox"] {
-            margin-top: 0.3rem;
-        }
+    select option {
+        background-color: #1b1f22;
+        color: #ffffff;
+    }
 
-        .lgpd-box label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: normal;
-            letter-spacing: normal;
-            text-transform: none;
-            margin: 0;
-            line-height: 1.4;
-        }
+    /* LGPD Box */
+    .lgpd-box {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-top: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
 
-        .actions {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: center;
-        }
+    .lgpd-box input[type="checkbox"] {
+        margin-top: 0.3rem;
+    }
 
-        .btn-submit {
-            width: 100%;
-            font-size: 1.1rem !important;
-            padding: 1rem !important;
-            background-color: #4CAF50 !important; /* Cor de conclusão */
-            color: white !important;
-            border-color: #4CAF50 !important;
-        }
+    .lgpd-box label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: normal;
+        letter-spacing: normal;
+        text-transform: none;
+        margin: 0;
+        line-height: 1.4;
+    }
 
-        .btn-submit:hover {
-            background-color: #45a049 !important;
-        }
-    </style>
-</head>
-<body class="is-preload anamnese-page">
+    .actions {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+    }
 
-    <div id="bg"></div>
+    .btn-submit {
+        width: 100%;
+        font-size: 1.1rem !important;
+        padding: 1rem !important;
+        background-color: #4CAF50 !important; /* Cor de conclusão */
+        color: white !important;
+        border-color: #4CAF50 !important;
+    }
 
-    <div class="anamnese-wrapper">
-        <div class="anamnese-header">
-            <span class="icon solid fa-notes-medical"></span>
-            <h1>Ficha de Anamnese</h1>
-            <p>Agendamento confirmado! Só precisamos de algumas informações sobre a sua saúde capilar para personalizar seu atendimento.</p>
-        </div>
+    .btn-submit:hover {
+        background-color: #45a049 !important;
+    }
+</style>
+{% endblock extra_css %}
 
-        <form method="post" action="{% url 'salvar_anamnese' %}">
-            {% csrf_token %}
-            
-            <div class="fields">
-                
-                <!-- ALERGIAS -->
-                <div class="field">
-                    <label for="alergias">Alergias Conhecidas</label>
-                    <span class="help-text">Você possui alergia a algum cosmético, óleo essencial, látex ou alimento?</span>
-                    <textarea name="alergias" id="alergias" rows="2" placeholder="Ex: Alergia a óleo de amêndoas, rinite forte com cheiros cítricos (Deixe em branco se não houver)."></textarea>
-                </div>
-
-                <!-- SENSIBILIDADES -->
-                <div class="field">
-                    <label for="sensibilidades">Sensibilidade do Couro Cabeludo</label>
-                    <span class="help-text">Como você avalia a sensibilidade da sua pele/couro cabeludo?</span>
-                    <select name="sensibilidades" id="sensibilidades" required>
-                        <option value="">Selecione uma opção...</option>
-                        <option value="Normal">Normal (Sem incômodos frequentes)</option>
-                        <option value="Sensivel">Sensível (Fica vermelho ou irritado com facilidade)</option>
-                        <option value="Dermatite/Caspa">Possuo dermatite, descamação ou caspa ativa</option>
-                        <option value="Dor">Sinto dor no couro cabeludo ao toque ou ao prender o cabelo</option>
-                    </select>
-                </div>
-
-                <!-- PROCEDIMENTOS ANTERIORES -->
-                <div class="field">
-                    <label for="procedimentos_anteriores">Procedimentos Químicos Anteriores</label>
-                    <span class="help-text">Realizou alisamentos, descolorações ou tinturas recentemente? Há quanto tempo?</span>
-                    <textarea name="procedimentos_anteriores" id="procedimentos_anteriores" rows="2" placeholder="Ex: Fiz luzes há 2 meses e progressiva há 6 meses."></textarea>
-                </div>
-
-                <!-- PREFERÊNCIAS -->
-                <div class="field">
-                    <label for="preferencias">Preferências de Atendimento</label>
-                    <span class="help-text">Como podemos tornar sua experiência perfeita?</span>
-                    <textarea name="preferencias" id="preferencias" rows="2" placeholder="Ex: Prefiro massagem com pressão mais forte. Gosto de aromas de lavanda. Prefiro um atendimento mais silencioso."></textarea>
-                </div>
-
-            </div>
-
-            <!-- LGPD - REST001 -->
-            <div class="lgpd-box">
-                <input type="checkbox" id="consentimento_lgpd" name="consentimento_lgpd" required>
-                <label for="consentimento_lgpd">
-                    <strong>Consentimento de Dados (LGPD):</strong> Autorizo o Yoona Head Spa a armazenar minhas respostas de saúde capilar estritamente para a finalidade de personalizar e garantir a segurança do meu atendimento terapêutico. Estou ciente de que esses dados são sigilosos e não serão compartilhados.
-                </label>
-            </div>
-
-            <ul class="actions">
-                <li>
-                    <button type="submit" class="button primary btn-submit icon solid fa-check">Concluir Agendamento</button>
-                </li>
-            </ul>
-
-        </form>
-
+{% block content %}
+<div class="anamnese-wrapper">
+    <div class="anamnese-header">
+        <span class="icon solid fa-notes-medical"></span>
+        <h1>Ficha de Anamnese</h1>
+        <p>Agendamento confirmado! Só precisamos de algumas informações sobre a sua saúde capilar para personalizar seu atendimento.</p>
     </div>
 
-    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
-    <script src="{% static 'assets/js/browser.min.js' %}"></script>
-    <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
-    <script src="{% static 'assets/js/util.js' %}"></script>
-    <script src="{% static 'assets/js/main.js' %}"></script>
+    <form method="post" action="{% url 'salvar_anamnese' %}">
+        {% csrf_token %}
+        
+        <div class="fields">
+            
+            <!-- ALERGIAS -->
+            <div class="field">
+                <label for="alergias">Alergias Conhecidas</label>
+                <span class="help-text">Você possui alergia a algum cosmético, óleo essencial, látex ou alimento?</span>
+                <textarea name="alergias" id="alergias" rows="2" placeholder="Ex: Alergia a óleo de amêndoas, rinite forte com cheiros cítricos (Deixe em branco se não houver)."></textarea>
+            </div>
 
-</body>
-</html>
+            <!-- SENSIBILIDADES -->
+            <div class="field">
+                <label for="sensibilidades">Sensibilidade do Couro Cabeludo</label>
+                <span class="help-text">Como você avalia a sensibilidade da sua pele/couro cabeludo?</span>
+                <select name="sensibilidades" id="sensibilidades" required>
+                    <option value="">Selecione uma opção...</option>
+                    <option value="Normal">Normal (Sem incômodos frequentes)</option>
+                    <option value="Sensivel">Sensível (Fica vermelho ou irritado com facilidade)</option>
+                    <option value="Dermatite/Caspa">Possuo dermatite, descamação ou caspa ativa</option>
+                    <option value="Dor">Sinto dor no couro cabeludo ao toque ou ao prender o cabelo</option>
+                </select>
+            </div>
+
+            <!-- PROCEDIMENTOS ANTERIORES -->
+            <div class="field">
+                <label for="procedimentos_anteriores">Procedimentos Químicos Anteriores</label>
+                <span class="help-text">Realizou alisamentos, descolorações ou tinturas recentemente? Há quanto tempo?</span>
+                <textarea name="procedimentos_anteriores" id="procedimentos_anteriores" rows="2" placeholder="Ex: Fiz luzes há 2 meses e progressiva há 6 meses."></textarea>
+            </div>
+
+            <!-- PREFERÊNCIAS -->
+            <div class="field">
+                <label for="preferencias">Preferências de Atendimento</label>
+                <span class="help-text">Como podemos tornar sua experiência perfeita?</span>
+                <textarea name="preferencias" id="preferencias" rows="2" placeholder="Ex: Prefiro massagem com pressão mais forte. Gosto de aromas de lavanda. Prefiro um atendimento mais silencioso."></textarea>
+            </div>
+
+        </div>
+
+        <!-- LGPD - REST001 -->
+        <div class="lgpd-box">
+            <input type="checkbox" id="consentimento_lgpd" name="consentimento_lgpd" required>
+            <label for="consentimento_lgpd">
+                <strong>Consentimento de Dados (LGPD):</strong> Autorizo o Yoona Head Spa a armazenar minhas respostas de saúde capilar estritamente para a finalidade de personalizar e garantir a segurança do meu atendimento terapêutico. Estou ciente de que esses dados são sigilosos e não serão compartilhados.
+            </label>
+        </div>
+
+        <ul class="actions">
+            <li>
+                <button type="submit" class="button primary btn-submit icon solid fa-check">Concluir Agendamento</button>
+            </li>
+        </ul>
+
+    </form>
+
+</div>
+{% endblock content %}

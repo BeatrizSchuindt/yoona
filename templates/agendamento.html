@@ -1,278 +1,263 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE HTML>
-<html lang="pt-br">
-<head>
-    <title>Agendamento | Yoona Head Spa</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    
-    <!-- CSS original do template -->
-    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-    <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
 
-    <style>
-        body.scheduling-page {
-            background-color: #1b1f22;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: "Source Sans Pro", Helvetica, sans-serif;
-            color: #ffffff;
-        }
+{% block title %}Agendamento | Yoona Head Spa{% endblock title %}
 
-        /* Container centralizado para o formulário */
-        .scheduling-wrapper {
-            width: 100%;
-            max-width: 600px;
-            padding: 2rem;
-            margin: 2rem;
-            background: rgba(27, 31, 34, 0.85); /* Fundo escuro com leve transparência */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-        }
+{% block body_class %}scheduling-page{% endblock body_class %}
 
-        .scheduling-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 1.5rem;
-        }
+{% block extra_css %}
+<style>
+    body.scheduling-page {
+        background-color: #1b1f22;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: "Source Sans Pro", Helvetica, sans-serif;
+        color: #ffffff;
+    }
 
-        .scheduling-header .icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: inline-block;
-        }
+    /* Container centralizado para o formulário */
+    .scheduling-wrapper {
+        width: 100%;
+        max-width: 600px;
+        padding: 2rem;
+        margin: 2rem;
+        background: rgba(27, 31, 34, 0.85); /* Fundo escuro com leve transparência */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+    }
 
-        .scheduling-header h1 {
-            font-size: 1.8rem;
-            letter-spacing: 0.2rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-        }
+    .scheduling-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1.5rem;
+    }
 
-        .scheduling-header p {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin: 0;
-        }
+    .scheduling-header .icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
 
-        /* Estilização dos passos do formulário */
-        .form-step {
-            margin-bottom: 2.5rem;
-        }
+    .scheduling-header h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.2rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
 
-        .form-step h3 {
-            font-size: 1.1rem;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-        }
+    .scheduling-header p {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
 
-        .form-step h3 span.step-number {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 28px;
-            height: 28px;
-            background: #ffffff;
-            color: #1b1f22;
-            border-radius: 50%;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-right: 10px;
-        }
+    /* Estilização dos passos do formulário */
+    .form-step {
+        margin-bottom: 2.5rem;
+    }
 
-        /* Ajustes dos campos para herdar o visual do template */
-        .fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-        }
+    .form-step h3 {
+        font-size: 1.1rem;
+        color: #ffffff;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
 
-        .field {
-            flex: 1 1 100%;
-        }
+    .form-step h3 span.step-number {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 28px;
+        height: 28px;
+        background: #ffffff;
+        color: #1b1f22;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-right: 10px;
+    }
 
-        .field.half {
-            flex: 1 1 calc(50% - 0.75rem);
-        }
+    /* Ajustes dos campos para herdar o visual do template */
+    .fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
 
-        label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-transform: uppercase;
-            letter-spacing: 0.1rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
+    .field {
+        flex: 1 1 100%;
+    }
 
-        input[type="text"],
-        input[type="tel"],
-        input[type="date"],
-        input[type="time"],
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: solid 1px rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border-radius: 4px;
-            font-family: inherit;
-        }
+    .field.half {
+        flex: 1 1 calc(50% - 0.75rem);
+    }
 
-        input:focus, select:focus {
-            border-color: #ffffff;
-            outline: none;
-            background: rgba(255, 255, 255, 0.08);
-        }
+    label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.1rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
 
-        /* Estilo especial para select, date e time para não ficarem com texto escuro no Windows/Chrome */
-        select option {
-            background-color: #1b1f22;
-            color: #ffffff;
-        }
+    input[type="text"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="time"],
+    select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: solid 1px rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        border-radius: 4px;
+        font-family: inherit;
+    }
 
-        .actions {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 2rem;
-        }
+    input:focus, select:focus {
+        border-color: #ffffff;
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+    }
 
-        .btn-submit {
-            width: 100%;
-            text-align: center;
-            font-size: 1rem !important;
-            padding: 1rem !important;
-        }
+    /* Estilo especial para select, date e time para não ficarem com texto escuro no Windows/Chrome */
+    select option {
+        background-color: #1b1f22;
+        color: #ffffff;
+    }
 
-        .back-link {
-            text-align: center;
-            display: block;
-            margin-top: 1.5rem;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
-        }
+    .actions {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 2rem;
+    }
 
-        .back-link:hover {
-            color: #ffffff;
-            border-bottom-color: transparent;
-        }
+    .btn-submit {
+        width: 100%;
+        text-align: center;
+        font-size: 1rem !important;
+        padding: 1rem !important;
+    }
 
-        /* Informativo sobre a Anamnese */
-        .info-box {
-            background: rgba(255, 255, 255, 0.03);
-            border-left: 3px solid #ffffff;
-            padding: 1rem;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 1.5rem;
-        }
-    </style>
-</head>
-<body class="is-preload scheduling-page">
+    .back-link {
+        text-align: center;
+        display: block;
+        margin-top: 1.5rem;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
+    }
 
-    <div id="bg"></div> <!-- Mantém a imagem de fundo do sistema -->
+    .back-link:hover {
+        color: #ffffff;
+        border-bottom-color: transparent;
+    }
 
-    <div class="scheduling-wrapper">
-        <div class="scheduling-header">
-            <span class="icon fa-gem"></span>
-            <h1>Agendar Sessão</h1>
-            <p>Rápido, prático e sem necessidade de senhas.</p>
-        </div>
+    /* Informativo sobre a Anamnese */
+    .info-box {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid #ffffff;
+        padding: 1rem;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock extra_css %}
 
-        <form method="post" action="{% url 'processar_agendamento' %}">
-            {% csrf_token %}
-            
-            <!-- PASSO 1: SERVIÇO -->
-            <div class="form-step">
-                <h3><span class="step-number">1</span> Escolha o Serviço</h3>
-                <div class="fields">
-                    <div class="field">
-                        <label for="servico">Terapias Disponíveis</label>
-                        <select name="servico" id="servico" required>
-                            <option value="">Selecione um tratamento...</option>
-                            <!-- Idealmente, essas opções virão do Banco de Dados via Django -->
-                            <option value="1">Detox Capilar - 60 min (R$ 150,00)</option>
-                            <option value="2">Terapia Relaxante VIP - 90 min (R$ 220,00)</option>
-                            <option value="3">Revitalização Yoona - 60 min (R$ 180,00)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PASSO 2: DATA E HORA -->
-            <div class="form-step">
-                <h3><span class="step-number">2</span> Data e Horário</h3>
-                <div class="fields">
-                    <div class="field half">
-                        <label for="data">Data Desejada</label>
-                        <!-- O atributo min pode ser preenchido dinamicamente no Django para evitar datas passadas -->
-                        <input type="date" name="data" id="data" required />
-                    </div>
-                    <div class="field half">
-                        <label for="horario">Horário</label>
-                        <input type="time" name="horario" id="horario" required />
-                    </div>
-                </div>
-            </div>
-
-            <!-- PASSO 3: IDENTIFICAÇÃO (Foco em conversão) -->
-            <div class="form-step">
-                <h3><span class="step-number">3</span> Seus Dados</h3>
-                <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: -1rem; margin-bottom: 1.5rem;">
-                    Usaremos seu CPF para encontrar seu histórico ou criar um novo cadastro automaticamente.
-                </p>
-                <div class="fields">
-                    <div class="field">
-                        <label for="cpf">CPF (Apenas números)</label>
-                        <!-- É recomendado adicionar uma máscara JS no frontend para formatar o CPF -->
-                        <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required maxlength="14" />
-                    </div>
-                    <div class="field half">
-                        <label for="nome">Nome Completo</label>
-                        <input type="text" name="nome" id="nome" placeholder="Como devemos chamar você?" required />
-                    </div>
-                    <div class="field half">
-                        <label for="telefone">WhatsApp</label>
-                        <input type="tel" name="telefone" id="telefone" placeholder="(00) 00000-0000" required />
-                    </div>
-                </div>
-            </div>
-
-            <div class="info-box">
-                <strong>Próximo Passo:</strong> Após confirmar o horário, você será direcionado(a) para preencher sua Ficha de Anamnese digital. É rapidinho e essencial para o seu atendimento!
-            </div>
-
-            <ul class="actions">
-                <li style="width: 100%;">
-                    <button type="submit" class="button primary btn-submit">Confirmar Agendamento</button>
-                </li>
-            </ul>
-
-        </form>
-
-        <a href="{% url 'home' %}" class="back-link">Cancelar e voltar para a Página Inicial</a>
-
+{% block content %}
+<div class="scheduling-wrapper">
+    <div class="scheduling-header">
+        <span class="icon fa-gem"></span>
+        <h1>Agendar Sessão</h1>
+        <p>Rápido, prático e sem necessidade de senhas.</p>
     </div>
 
-    <!-- Scripts necessários do template -->
-    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
-    <script src="{% static 'assets/js/browser.min.js' %}"></script>
-    <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
-    <script src="{% static 'assets/js/util.js' %}"></script>
-    <script src="{% static 'assets/js/main.js' %}"></script>
+    <form method="post" action="{% url 'processar_agendamento' %}">
+        {% csrf_token %}
+        
+        <!-- PASSO 1: SERVIÇO -->
+        <div class="form-step">
+            <h3><span class="step-number">1</span> Escolha o Serviço</h3>
+            <div class="fields">
+                <div class="field">
+                    <label for="servico">Terapias Disponíveis</label>
+                    <select name="servico" id="servico" required>
+                        <option value="">Selecione um tratamento...</option>
+                        <!-- Idealmente, essas opções virão do Banco de Dados via Django -->
+                        <option value="1">Detox Capilar - 60 min (R$ 150,00)</option>
+                        <option value="2">Terapia Relaxante VIP - 90 min (R$ 220,00)</option>
+                        <option value="3">Revitalização Yoona - 60 min (R$ 180,00)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-</body>
-</html>
+        <!-- PASSO 2: DATA E HORA -->
+        <div class="form-step">
+            <h3><span class="step-number">2</span> Data e Horário</h3>
+            <div class="fields">
+                <div class="field half">
+                    <label for="data">Data Desejada</label>
+                    <!-- O atributo min pode ser preenchido dinamicamente no Django para evitar datas passadas -->
+                    <input type="date" name="data" id="data" required />
+                </div>
+                <div class="field half">
+                    <label for="horario">Horário</label>
+                    <input type="time" name="horario" id="horario" required />
+                </div>
+            </div>
+        </div>
+
+        <!-- PASSO 3: IDENTIFICAÇÃO (Foco em conversão) -->
+        <div class="form-step">
+            <h3><span class="step-number">3</span> Seus Dados</h3>
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: -1rem; margin-bottom: 1.5rem;">
+                Usaremos seu CPF para encontrar seu histórico ou criar um novo cadastro automaticamente.
+            </p>
+            <div class="fields">
+                <div class="field">
+                    <label for="cpf">CPF (Apenas números)</label>
+                    <!-- É recomendado adicionar uma máscara JS no frontend para formatar o CPF -->
+                    <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required maxlength="14" />
+                </div>
+                <div class="field half">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" name="nome" id="nome" placeholder="Como devemos chamar você?" required />
+                </div>
+                <div class="field half">
+                    <label for="telefone">WhatsApp</label>
+                    <input type="tel" name="telefone" id="telefone" placeholder="(00) 00000-0000" required />
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>Próximo Passo:</strong> Após confirmar o horário, você será direcionado(a) para preencher sua Ficha de Anamnese digital. É rapidinho e essencial para o seu atendimento!
+        </div>
+
+        <ul class="actions">
+            <li style="width: 100%;">
+                <button type="submit" class="button primary btn-submit">Confirmar Agendamento</button>
+            </li>
+        </ul>
+
+    </form>
+
+    <a href="{% url 'home' %}" class="back-link">Cancelar e voltar para a Página Inicial</a>
+
+</div>
+{% endblock content %}
