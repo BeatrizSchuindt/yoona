@@ -1,182 +1,91 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acesso da Equipe | Yoona Head Spa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome-all.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'assets/css/yoona-admin.css' %}" />
+</head>
+<body>
 
-{% block title %}Acesso Restrito | Yoona Head Spa{% endblock title %}
+<div class="login-layout">
 
-{% block body_class %}login-page{% endblock body_class %}
-
-{% block extra_css %}
-<style>
-    #bg { display: none !important; }
-
-    body.login-page {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        height: 100vh;
-        background-color: #1b1f22;
-        font-family: "Source Sans Pro", Helvetica, sans-serif;
-    }
-
-    .login-wrapper { display: flex; width: 100%; height: 100%; }
-
-    .login-image-side {
-        flex: 1;
-        display: none;
-        background-color: #000;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .login-image-side img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.7;
-    }
-
-    .login-form-side {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 3rem;
-        background: #1b1f22;
-        color: #ffffff;
-    }
-
-    .login-form-container { width: 100%; max-width: 400px; }
-
-    .login-header { text-align: center; margin-bottom: 2rem; }
-
-    .login-header h2 {
-        font-size: 2rem;
-        letter-spacing: 0.2rem;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-    }
-
-    .login-header p {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.5);
-        margin: 0;
-    }
-
-    .login-form-container .fields {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .login-form-container input[type="text"],
-    .login-form-container input[type="password"] {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: solid 1px rgba(255, 255, 255, 0.15);
-        color: inherit;
-        border-radius: 4px;
-    }
-
-    .login-form-container input[type="text"]:focus,
-    .login-form-container input[type="password"]:focus {
-        border-color: #ffffff;
-        outline: none;
-    }
-
-    .form-options {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.8rem;
-        margin-top: -0.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .form-options a {
-        color: rgba(255, 255, 255, 0.5);
-        border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
-        text-decoration: none;
-    }
-
-    .form-options a:hover {
-        color: #ffffff;
-        border-bottom-color: transparent;
-    }
-
-    .btn-login { width: 100%; text-align: center; }
-
-    @media screen and (min-width: 736px) {
-        .login-image-side { display: block; }
-    }
-</style>
-{% endblock extra_css %}
-
-{% block content %}
-<div class="login-wrapper">
-    <div class="login-image-side">
-        <!-- Lembre-se de colocar uma imagem real chamada login-bg.jpg na sua pasta static/images/ -->
-        <img src="{% static 'images/login-bg.jpg' %}" alt="Detalhe do ambiente relaxante do Yoona Head Spa" />
+  <!-- LADO VISUAL (desktop) -->
+  <div class="login-visual" aria-hidden="true">
+    <img src="{% static 'images/pic02.jpg' %}" alt="" />
+    <div class="login-visual-overlay">
+      <div class="login-marca-nome">YOON·A</div>
+      <div class="login-marca-sub">Head Spa</div>
     </div>
+  </div>
 
-    <div class="login-form-side">
-        <div class="login-form-container">
-            <div class="login-header">
-                <span class="icon fa-gem" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></span>
-                <h2>Yoona Spa</h2>
-                <p>Acesso da Equipe</p>
+  <!-- FORMULÁRIO -->
+  <div class="login-form-area">
+    <div class="login-box">
+
+      <div class="login-header">
+        <div class="login-icone"><i class="fas fa-lock"></i></div>
+        <h2>Acesso da Equipe</h2>
+        <p>Entre com suas credenciais para continuar</p>
+      </div>
+
+      <form method="post" action="{% url 'login' %}" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next|default:'' }}">
+
+        <div class="form-admin" style="max-width:100%;">
+
+          <div class="form-group">
+            <label for="id_username">Usuário</label>
+            <input type="text"
+                   name="username"
+                   id="id_username"
+                   placeholder="Digite seu usuário"
+                   required autofocus
+                   autocomplete="username" />
+          </div>
+
+          <div class="form-group">
+            <label for="id_password">Senha</label>
+            <input type="password"
+                   name="password"
+                   id="id_password"
+                   placeholder="Digite sua senha"
+                   required
+                   autocomplete="current-password" />
+          </div>
+
+          <div class="form-opcoes">
+            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.76rem;text-transform:none;letter-spacing:normal;color:var(--texto-muted);cursor:pointer;">
+              <input type="checkbox" name="remember_me" id="remember_me" style="accent-color:var(--gold);width:auto;padding:0;" />
+              Lembrar-me
+            </label>
+            <a href="{% url 'password_reset' %}">Esqueceu a senha?</a>
+          </div>
+
+          {% if form.errors %}
+            <div class="alert alert-error" style="margin-bottom:1rem;">
+              <i class="fas fa-exclamation-circle"></i>
+              Usuário ou senha incorretos. Verifique e tente novamente.
             </div>
+          {% endif %}
 
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                
-                <input type="hidden" name="next" value="{{ next|default:'' }}">
-                
-                <div class="fields">
-                    <div class="field">
-                        <label for="username">Usuário / E-mail</label>
-                        <input type="text" name="username" id="username" placeholder="Digite seu usuário" required autofocus />
-                    </div>
-                    
-                    <div class="field">
-                        <label for="password">Senha</label>
-                        <input type="password" name="password" id="password" placeholder="Digite sua senha" required />
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <!-- Nota de Sênior: O checkbox 'remember_me' requereria uma lógica extra na View para alterar a expiração da sessão, 
-                         mas vamos manter no HTML por motivos de design por enquanto -->
-                    <div class="field">
-                        <input type="checkbox" id="remember_me" name="remember_me">
-                        <label for="remember_me">Lembrar-me</label>
-                    </div>
-                    <a href="{% url 'password_reset' %}">Esqueceu a senha?</a>
-                </div>
-                
-                <ul class="actions">
-                    <li style="width: 100%;">
-                        <input type="submit" value="Entrar no Sistema" class="primary btn-login" />
-                    </li>
-                </ul>
-                
-                {% if form.errors %}
-                    <div style="background-color: rgba(255, 107, 107, 0.1); border-left: 4px solid #ff6b6b; padding: 10px; margin-top: 1rem;">
-                        <p style="color: #ff6b6b; font-size: 0.85rem; text-align: center; margin: 0;">
-                            Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.
-                        </p>
-                    </div>
-                {% endif %}
-
-            </form>
-
-            <p style="text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.3); margin-top: 3rem;">
-                &copy; Yoona Head Spa. Desenvolvido por Ana Beatriz Schuindt.
-            </p>
+          <button type="submit" class="btn-admin btn-admin-primario btn-admin-lg" style="width:100%;justify-content:center;">
+            <i class="fas fa-sign-in-alt"></i> Entrar no sistema
+          </button>
 
         </div>
+      </form>
+
+      <p class="login-rodape">&copy; Yoona Head Spa — Desenvolvido por Ana Beatriz Schuindt.</p>
     </div>
+  </div>
 
 </div>
-{% endblock content %}
+</body>
+</html>

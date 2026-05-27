@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Yoona Head Spa{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}Yoona Head Spa — terapias capilares exclusivas em Cuiabá.{% endblock %}" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome-all.min.css' %}" />
+
+  <!-- Yoona Cliente CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/yoona-cliente.css' %}" />
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav-cliente" role="navigation" aria-label="Navegação principal">
+    <a href="{% url 'servicos:home' %}" class="nav-logo" aria-label="Yoona Head Spa - página inicial">
+      <span class="nav-logo-nome">YOON<span style="color:var(--texto-muted);">·</span>A</span>
+      <span class="nav-logo-sub">Head Spa</span>
+    </a>
+
+    <ul class="nav-links-desktop" role="list">
+      <li><a href="{% url 'servicos:home' %}#sobre">Sobre</a></li>
+      <li><a href="{% url 'servicos:home' %}#catalogo">Serviços</a></li>
+      <li><a href="{% url 'servicos:home' %}#agendamento">Agendar</a></li>
+      <li><a href="{% url 'servicos:home' %}#localizacao">Localização</a></li>
+    </ul>
+
+    <button class="nav-hamburger" id="btn-abrir-menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav-drawer-overlay">
+      <i class="fas fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- DRAWER MOBILE -->
+  <div class="nav-drawer-overlay" id="nav-drawer-overlay" role="dialog" aria-modal="true" aria-label="Menu de navegação">
+    <nav class="nav-drawer">
+      <button class="nav-drawer-fechar" id="btn-fechar-menu" aria-label="Fechar menu">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="nav-drawer-logo">YOON·A</div>
+      <div class="nav-drawer-sub">Head Spa</div>
+      <ul class="nav-drawer-links" role="list">
+        <li><a href="{% url 'servicos:home' %}#sobre" class="fechar-drawer">Sobre nós</a></li>
+        <li><a href="{% url 'servicos:home' %}#catalogo" class="fechar-drawer">Catálogo de Serviços</a></li>
+        <li><a href="{% url 'servicos:home' %}#agendamento" class="fechar-drawer">Agendamento</a></li>
+        <li><a href="{% url 'servicos:home' %}#localizacao" class="fechar-drawer">Localização</a></li>
+      </ul>
+      <div class="nav-drawer-cta">
+        <a href="{% url 'servicos:home' %}#agendamento" class="btn btn-dourado btn-full fechar-drawer">
+          <i class="fas fa-calendar-alt"></i> Agendar agora
+        </a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- MESSAGES -->
+  {% if messages %}
+    <div class="messages-container" role="alert" aria-live="polite">
+      {% for msg in messages %}
+        <div class="message-item message-{{ msg.tags }}">
+          {% if msg.tags == 'success' %}<i class="fas fa-check-circle"></i>
+          {% elif msg.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>
+          {% elif msg.tags == 'warning' %}<i class="fas fa-exclamation-triangle"></i>
+          {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="cliente-main" id="conteudo-principal">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer-cliente">
+    <div class="footer-marca">YOON·A</div>
+    <div class="footer-marca-sub">Head Spa</div>
+    <ul class="footer-nav" role="list">
+      <li><a href="{% url 'servicos:home' %}#sobre">Sobre</a></li>
+      <li><a href="{% url 'servicos:home' %}#catalogo">Serviços</a></li>
+      <li><a href="{% url 'servicos:home' %}#agendamento">Agendar</a></li>
+      <li><a href="{% url 'servicos:home' %}#localizacao">Contato</a></li>
+    </ul>
+    <div class="footer-social">
+      <a href="#" class="footer-social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="footer-social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="#" class="footer-social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+    </div>
+    <p class="footer-copy">&copy; Yoona Head Spa. Desenvolvido por Ana Beatriz Schuindt.</p>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    (function () {
+      const overlay   = document.getElementById('nav-drawer-overlay');
+      const btnAbrir  = document.getElementById('btn-abrir-menu');
+      const btnFechar = document.getElementById('btn-fechar-menu');
+      const links     = document.querySelectorAll('.fechar-drawer');
+
+      function abrirMenu() {
+        overlay.classList.add('aberto');
+        btnAbrir.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+      function fecharMenu() {
+        overlay.classList.remove('aberto');
+        btnAbrir.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+
+      btnAbrir.addEventListener('click', abrirMenu);
+      btnFechar.addEventListener('click', fecharMenu);
+      links.forEach(l => l.addEventListener('click', fecharMenu));
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) fecharMenu();
+      });
+    })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

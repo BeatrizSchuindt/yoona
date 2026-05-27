@@ -1,263 +1,117 @@
-{% extends 'base.html' %}
+{% extends 'base_cliente.html' %}
 {% load static %}
 
-{% block title %}Agendamento | Yoona Head Spa{% endblock title %}
-
-{% block body_class %}scheduling-page{% endblock body_class %}
-
-{% block extra_css %}
-<style>
-    body.scheduling-page {
-        background-color: #1b1f22;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        font-family: "Source Sans Pro", Helvetica, sans-serif;
-        color: #ffffff;
-    }
-
-    /* Container centralizado para o formulário */
-    .scheduling-wrapper {
-        width: 100%;
-        max-width: 600px;
-        padding: 2rem;
-        margin: 2rem;
-        background: rgba(27, 31, 34, 0.85); /* Fundo escuro com leve transparência */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        backdrop-filter: blur(10px);
-    }
-
-    .scheduling-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 1.5rem;
-    }
-
-    .scheduling-header .icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        display: inline-block;
-    }
-
-    .scheduling-header h1 {
-        font-size: 1.8rem;
-        letter-spacing: 0.2rem;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-    }
-
-    .scheduling-header p {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.6);
-        margin: 0;
-    }
-
-    /* Estilização dos passos do formulário */
-    .form-step {
-        margin-bottom: 2.5rem;
-    }
-
-    .form-step h3 {
-        font-size: 1.1rem;
-        color: #ffffff;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-step h3 span.step-number {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 28px;
-        height: 28px;
-        background: #ffffff;
-        color: #1b1f22;
-        border-radius: 50%;
-        font-size: 0.8rem;
-        font-weight: bold;
-        margin-right: 10px;
-    }
-
-    /* Ajustes dos campos para herdar o visual do template */
-    .fields {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .field {
-        flex: 1 1 100%;
-    }
-
-    .field.half {
-        flex: 1 1 calc(50% - 0.75rem);
-    }
-
-    label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.8);
-        text-transform: uppercase;
-        letter-spacing: 0.1rem;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    input[type="text"],
-    input[type="tel"],
-    input[type="date"],
-    input[type="time"],
-    select {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: solid 1px rgba(255, 255, 255, 0.15);
-        color: #ffffff;
-        border-radius: 4px;
-        font-family: inherit;
-    }
-
-    input:focus, select:focus {
-        border-color: #ffffff;
-        outline: none;
-        background: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Estilo especial para select, date e time para não ficarem com texto escuro no Windows/Chrome */
-    select option {
-        background-color: #1b1f22;
-        color: #ffffff;
-    }
-
-    .actions {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 2rem;
-    }
-
-    .btn-submit {
-        width: 100%;
-        text-align: center;
-        font-size: 1rem !important;
-        padding: 1rem !important;
-    }
-
-    .back-link {
-        text-align: center;
-        display: block;
-        margin-top: 1.5rem;
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-decoration: none;
-        border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
-    }
-
-    .back-link:hover {
-        color: #ffffff;
-        border-bottom-color: transparent;
-    }
-
-    /* Informativo sobre a Anamnese */
-    .info-box {
-        background: rgba(255, 255, 255, 0.03);
-        border-left: 3px solid #ffffff;
-        padding: 1rem;
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.7);
-        margin-bottom: 1.5rem;
-    }
-</style>
-{% endblock extra_css %}
+{% block title %}Agendar Sessão | Yoona Head Spa{% endblock %}
+{% block meta_desc %}Agende sua sessão no Yoona Head Spa. Rápido e sem precisar criar conta.{% endblock %}
 
 {% block content %}
-<div class="scheduling-wrapper">
-    <div class="scheduling-header">
-        <span class="icon fa-gem"></span>
-        <h1>Agendar Sessão</h1>
-        <p>Rápido, prático e sem necessidade de senhas.</p>
+
+<div class="form-wrapper">
+  <div class="form-card">
+
+    <div class="form-card-header">
+      <div class="form-card-icone"><i class="fas fa-calendar-alt"></i></div>
+      <h1>Agendar Sessão</h1>
+      <p>Rápido, prático — sem necessidade de senha.</p>
     </div>
 
-    <form method="post" action="{% url 'processar_agendamento' %}">
-        {% csrf_token %}
-        
-        <!-- PASSO 1: SERVIÇO -->
-        <div class="form-step">
-            <h3><span class="step-number">1</span> Escolha o Serviço</h3>
-            <div class="fields">
-                <div class="field">
-                    <label for="servico">Terapias Disponíveis</label>
-                    <select name="servico" id="servico" required>
-                        <option value="">Selecione um tratamento...</option>
-                        <!-- Idealmente, essas opções virão do Banco de Dados via Django -->
-                        <option value="1">Detox Capilar - 60 min (R$ 150,00)</option>
-                        <option value="2">Terapia Relaxante VIP - 90 min (R$ 220,00)</option>
-                        <option value="3">Revitalização Yoona - 60 min (R$ 180,00)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+    <form method="post" action="#" novalidate>
+      {% csrf_token %}
 
-        <!-- PASSO 2: DATA E HORA -->
-        <div class="form-step">
-            <h3><span class="step-number">2</span> Data e Horário</h3>
-            <div class="fields">
-                <div class="field half">
-                    <label for="data">Data Desejada</label>
-                    <!-- O atributo min pode ser preenchido dinamicamente no Django para evitar datas passadas -->
-                    <input type="date" name="data" id="data" required />
-                </div>
-                <div class="field half">
-                    <label for="horario">Horário</label>
-                    <input type="time" name="horario" id="horario" required />
-                </div>
-            </div>
+      <!-- PASSO 1: SERVIÇO -->
+      <div class="form-section">
+        <div class="form-section-titulo">
+          <span class="passo-num">1</span> Escolha o Serviço
         </div>
-
-        <!-- PASSO 3: IDENTIFICAÇÃO (Foco em conversão) -->
-        <div class="form-step">
-            <h3><span class="step-number">3</span> Seus Dados</h3>
-            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: -1rem; margin-bottom: 1.5rem;">
-                Usaremos seu CPF para encontrar seu histórico ou criar um novo cadastro automaticamente.
-            </p>
-            <div class="fields">
-                <div class="field">
-                    <label for="cpf">CPF (Apenas números)</label>
-                    <!-- É recomendado adicionar uma máscara JS no frontend para formatar o CPF -->
-                    <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required maxlength="14" />
-                </div>
-                <div class="field half">
-                    <label for="nome">Nome Completo</label>
-                    <input type="text" name="nome" id="nome" placeholder="Como devemos chamar você?" required />
-                </div>
-                <div class="field half">
-                    <label for="telefone">WhatsApp</label>
-                    <input type="tel" name="telefone" id="telefone" placeholder="(00) 00000-0000" required />
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="servico">Terapia Disponível</label>
+          <select name="servico" id="servico" required>
+            <option value="">Selecione um tratamento...</option>
+            {% for terapia in terapias %}
+              <option value="{{ terapia.id }}">{{ terapia.nome }} — {{ terapia.duracao }} min (R$ {{ terapia.preco_base }})</option>
+            {% endfor %}
+          </select>
         </div>
+      </div>
 
-        <div class="info-box">
-            <strong>Próximo Passo:</strong> Após confirmar o horário, você será direcionado(a) para preencher sua Ficha de Anamnese digital. É rapidinho e essencial para o seu atendimento!
+      <!-- PASSO 2: DATA E HORÁRIO -->
+      <div class="form-section">
+        <div class="form-section-titulo">
+          <span class="passo-num">2</span> Data e Horário
         </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="data">Data desejada</label>
+            <input type="date" name="data" id="data" required />
+          </div>
+          <div class="form-group">
+            <label for="horario">Horário</label>
+            <input type="time" name="horario" id="horario" required />
+          </div>
+        </div>
+      </div>
 
-        <ul class="actions">
-            <li style="width: 100%;">
-                <button type="submit" class="button primary btn-submit">Confirmar Agendamento</button>
-            </li>
-        </ul>
+      <!-- PASSO 3: IDENTIFICAÇÃO -->
+      <div class="form-section">
+        <div class="form-section-titulo">
+          <span class="passo-num">3</span> Seus Dados
+        </div>
+        <p style="font-size:0.82rem;color:var(--texto-muted);margin:-0.5rem 0 1rem;">
+          Usamos seu CPF para encontrar seu cadastro ou criar um novo automaticamente.
+        </p>
+        <div class="form-group">
+          <label for="cpf">CPF</label>
+          <input type="text"
+                 name="cpf"
+                 id="cpf"
+                 placeholder="000.000.000-00"
+                 required
+                 maxlength="14"
+                 inputmode="numeric" />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="nome">Nome completo</label>
+            <input type="text" name="nome" id="nome" placeholder="Como devemos chamar você?" required />
+          </div>
+          <div class="form-group">
+            <label for="telefone">WhatsApp</label>
+            <input type="tel" name="telefone" id="telefone" placeholder="(65) 99999-0000" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Próximo passo:</strong> Após confirmar, você preencherá uma breve Ficha de Anamnese para personalizarmos seu atendimento.
+      </div>
+
+      <button type="submit" class="btn btn-dourado btn-full btn-lg">
+        <i class="fas fa-check"></i> Confirmar Agendamento
+      </button>
 
     </form>
 
-    <a href="{% url 'home' %}" class="back-link">Cancelar e voltar para a Página Inicial</a>
+    <a href="{% url 'servicos:home' %}" class="form-back-link">
+      <i class="fas fa-arrow-left" style="font-size:0.75rem;"></i> Cancelar e voltar
+    </a>
 
+  </div>
 </div>
-{% endblock content %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* Máscara CPF simples */
+  document.getElementById('cpf').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9)      v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/^(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/^(\d{3})(\d{0,3})/, '$1.$2');
+    this.value = v;
+  });
+
+  /* Data mínima = hoje */
+  document.getElementById('data').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}
