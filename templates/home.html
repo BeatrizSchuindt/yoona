@@ -1,155 +1,132 @@
+{% extends 'base_cliente.html' %}
 {% load static %}
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <title>Yoona Head Spa</title>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-        <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
-        <style>
-            @media screen and (min-width: 737px) {
-                #header nav ul li {
-                    flex: 1 1 25%;
-                    max-width: 25%;
-                }
-                
-                #header nav ul li a {
-                    font-size: 0.75rem;      
-                    letter-spacing: 0.1rem;  
-                    padding-left: 0.5rem;
-                    padding-right: 0.5rem; 
-                }
-            }
-        </style>
-    </head>
-    <body class="is-preload">
 
-        <div id="wrapper">
+{% block title %}Yoona Head Spa — Terapias Capilares em Cuiabá{% endblock %}
 
-                <header id="header">
-                        <div class="logo">
-                            <span class="icon fa-gem"></span>
-                        </div>
-                        <div class="content">
-                            <div class="inner">
-                                <h1>Yoona Head Spa</h1>
-                                <p>Relaxe, renove e cuide da sua saúde capilar.<br />
-                                O refúgio perfeito para o seu bem-estar físico e mental.</p>
-                            </div>
-                        </div>
-                        <nav>
-                            <ul>
-                                <li><a href="#sobre">Sobre</a></li>
-                                <li><a href="#catalogo">Catálogo</a></li>
-                                <li><a href="#agendamento">Agendar</a></li>
-                                <li><a href="#localizacao">Localização</a></li>
-                            </ul>
-                        </nav>
-                    </header>
+{% block content %}
 
-                <div id="main">
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <span class="hero-badge"><i class="fas fa-leaf"></i> &nbsp; Head Spa &amp; Terapias Capilares</span>
+  <h1>Cuide da sua mente.<br><span class="destaque">Renove seu couro cabeludo.</span></h1>
+  <p class="hero-sub">Um espaço exclusivo dedicado ao relaxamento profundo, à saúde capilar e ao bem-estar que você merece.</p>
+  <div class="hero-acoes">
+    <a href="#agendamento" class="btn btn-dourado btn-lg">
+      <i class="fas fa-calendar-alt"></i> Agendar agora
+    </a>
+    <a href="#catalogo" class="btn btn-outline-dourado btn-lg">
+      <i class="fas fa-spa"></i> Ver serviços
+    </a>
+  </div>
+</section>
 
-                        <!-- Aba 1: Sobre o Head Spa -->
-                        <article id="sobre">
-                                <h2 class="major">Sobre o Head Spa</h2>
-                                <span class="image main"><img src="{% static 'images/pic01.jpg' %}" alt="[Recepção acolhedora e relaxante do Yoona Head Spa]" /></span>
-                                <p>Bem-vindo ao <strong>Yoona Head Spa</strong>. Somos um espaço dedicado exclusivamente à terapia capilar e ao relaxamento profundo. Nosso objetivo é proporcionar um momento de desconexão da rotina, cuidando não apenas da estética, mas da saúde real do seu couro cabeludo e fios.</p>
-                                <p>Nossos terapeutas especializados utilizam técnicas de massagem, aromaterapia e produtos de alta qualidade para aliviar o estresse, melhorar a circulação e promover um equilíbrio perfeito. Descubra uma nova forma de se cuidar em um ambiente preparado para acolher você.</p>
-                        </article>
+<!-- SOBRE -->
+<section class="secao" id="sobre">
+  <div class="secao-titulo">
+    <div class="ornamento"><i class="fas fa-spa"></i></div>
+    <h2>Sobre o Head Spa</h2>
+    <p>Conheça nosso espaço e nossa filosofia de cuidado</p>
+  </div>
 
-                        <!-- Aba 2: Catálogo -->
-                        <article id="catalogo">
-                                <h2 class="major">Catálogo de Serviços</h2>
-                                <p>Conheça nossas terapias focadas no seu bem-estar. Escolha o serviço ideal para o seu momento:</p>
-                                
-                                <section>
-                                    {% for terapia in terapias %}
-                                        <div style="margin-bottom: 3rem;">
-                                            
-                                            <h3 class="major" style="margin-bottom: 0rem;">{{ terapia.nome }}</h3>
-                                            
-                                            {% if terapia.imagem %}
-                                                <span class="image main" style="margin-bottom: 1rem;">
-                                                    <img src="{{ terapia.imagem.url }}" alt="{{ terapia.nome }}" style="max-height: 350px; object-fit: cover;" />
-                                                </span>
-                                            {% endif %}
-                                            
-                                            <p style="margin-bottom: 1rem;">{{ terapia.descricao }}</p>
-                                            
-                                            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 1rem;  margin-top: 0;">
-                                                <span><strong>Duração:</strong> {{ terapia.duracao }} min</span>
-                                                <span><strong>Valor: </strong> R$ {{ terapia.preco_base }}</span>
-                                            </div>
-                                        </div>
-                                    {% empty %}
-                                        <p>Nenhuma terapia disponível no momento.</p>
-                                    {% endfor %}
-                                </section>
-                        </article>
+  <img src="{% static 'images/pic01.jpg' %}"
+       alt="Recepção acolhedora do Yoona Head Spa"
+       class="sobre-img"
+       loading="lazy" />
 
-                        <!-- Aba 3: Agendamento -->
-                        <article id="agendamento">
-                                <h2 class="major">Agendamento</h2>
-                                <span class="image main"><img src="{% static 'images/pic03.jpg' %}" alt="[Pessoa acessando o celular para fazer o agendamento online]" /></span>
-                                <p>Pensando na sua comodidade, nosso sistema de agendamento é 100% focado em praticidade. <strong>Não exigimos a criação de contas ou senhas!</strong></p>
-                                <p>Basta inserir o seu CPF para se identificar, escolher o melhor horário disponível na agenda de nossos terapeutas e confirmar a sua reserva. Imediatamente após a confirmação, você preencherá uma rápida <strong>Ficha de Anamnese digital</strong> para que possamos personalizar o seu atendimento de acordo com o seu histórico de saúde capilar.</p>
-                                
-                                <ul class="actions">
-                                    <li><a href="#iniciar-agendamento" class="button primary">Agendar Agora</a></li>
-                                </ul>
-                        </article>
+  <p>Bem-vindo ao <strong>Yoona Head Spa</strong>. Somos um espaço dedicado exclusivamente à terapia capilar e ao relaxamento profundo. Nosso objetivo é proporcionar um momento de desconexão da rotina, cuidando não apenas da estética, mas da saúde real do seu couro cabeludo e fios.</p>
+  <p>Nossos terapeutas especializados utilizam técnicas de massagem, aromaterapia e produtos de alta qualidade para aliviar o estresse, melhorar a circulação e promover um equilíbrio perfeito entre corpo e mente.</p>
+</section>
 
-                        <!-- Aba 4: Localização e Contato -->
-                        <article id="localizacao">
-                                <h2 class="major">Localização</h2>
-                                <p>Venha viver a experiência Yoona. Estamos localizados em um ambiente preparado para oferecer o máximo de tranquilidade.</p>
-                                <p><strong>Endereço:</strong> Avenida do Bem-Estar, 123 - Centro, Cuiabá - MT<br>
-                                <strong>Horário de Funcionamento:</strong> Terça a Sábado, das 09h às 19h.</p>
-                                
-                                <h3 class="major">Fale Conosco</h3>
-                                <form method="post" action="#">
-                                    <div class="fields">
-                                        <div class="field half">
-                                            <label for="name">Nome</label>
-                                            <input type="text" name="name" id="name" />
-                                        </div>
-                                        <div class="field half">
-                                            <label for="email">E-mail</label>
-                                            <input type="email" name="email" id="email" />
-                                        </div>
-                                        <div class="field">
-                                            <label for="message">Mensagem</label>
-                                            <textarea name="message" id="message" rows="4"></textarea>
-                                        </div>
-                                    </div>
-                                    <ul class="actions">
-                                        <li><input type="submit" value="Enviar Mensagem" class="primary" /></li>
-                                        <li><input type="reset" value="Limpar" /></li>
-                                    </ul>
-                                </form>
-                                <ul class="icons">
-                                    <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-                                    <li><a href="#" class="icon brands fa-whatsapp"><span class="label">WhatsApp</span></a></li>
-                                    <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-                                </ul>
-                        </article>
+<!-- CATÁLOGO -->
+<section class="secao" id="catalogo" style="background: var(--bg-surface);">
+  <div class="secao-titulo">
+    <div class="ornamento"><i class="fas fa-gem"></i></div>
+    <h2>Catálogo de Serviços</h2>
+    <p>Escolha a terapia ideal para o seu momento</p>
+  </div>
 
-                    </div>
+  <div class="catalogo-grid">
+    {% for terapia in terapias %}
+      <article class="card-servico">
+        {% if terapia.imagem %}
+          <img src="{{ terapia.imagem.url }}"
+               alt="{{ terapia.nome }}"
+               class="card-servico-img"
+               loading="lazy" />
+        {% else %}
+          <div class="card-servico-img-placeholder">
+            <i class="fas fa-spa"></i>
+          </div>
+        {% endif %}
 
-                <footer id="footer">
-                        <p class="copyright">&copy; Yoona Head Spa. Desenvolvido por Ana Beatriz Schuindt. Design original: <a href="https://html5up.net">HTML5 UP</a>.</p>
-                    </footer>
-
+        <div class="card-servico-body">
+          <div class="card-servico-nome">{{ terapia.nome }}</div>
+          <p class="card-servico-desc">{{ terapia.descricao }}</p>
+          <div class="card-servico-rodape">
+            <div class="card-servico-meta">
+              <span><i class="fas fa-clock" style="color:var(--gold); margin-right:4px;"></i>{{ terapia.duracao }} min</span>
+              <span class="preco">R$ {{ terapia.preco_base }}</span>
             </div>
+            <a href="#agendamento" class="btn btn-outline-dourado btn-sm">Agendar</a>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p style="color:var(--texto-muted); text-align:center; grid-column:1/-1;">
+        Nenhuma terapia disponível no momento.
+      </p>
+    {% endfor %}
+  </div>
+</section>
 
-        <div id="bg"></div>
+<!-- AGENDAMENTO -->
+<section class="secao" id="agendamento">
+  <div class="secao-titulo">
+    <div class="ornamento"><i class="fas fa-calendar-check"></i></div>
+    <h2>Agendamento Online</h2>
+    <p>Rápido, prático — sem necessidade de criar conta</p>
+  </div>
 
-        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
-            <script src="{% static 'assets/js/browser.min.js' %}"></script>
-            <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
-            <script src="{% static 'assets/js/util.js' %}"></script>
-            <script src="{% static 'assets/js/main.js' %}"></script>
+  <div style="max-width:600px; margin:0 auto; text-align:center;">
+    <img src="{% static 'images/pic03.jpg' %}"
+         alt="Agendamento online pelo celular"
+         class="sobre-img"
+         loading="lazy" />
+    <p>Basta informar seu <strong>CPF</strong>, escolher a terapia e o melhor horário disponível. Após confirmado, você preencherá uma rápida <strong>Ficha de Anamnese</strong> para personalizarmos seu atendimento.</p>
+    <a href="{% url 'servicos:home' %}#agendamento" class="btn btn-dourado btn-lg" style="margin-top:1rem;">
+      <i class="fas fa-calendar-alt"></i> Iniciar agendamento
+    </a>
+  </div>
+</section>
 
-    </body>
-</html>
+<!-- LOCALIZAÇÃO -->
+<section class="secao" id="localizacao" style="background: var(--bg-surface);">
+  <div class="secao-titulo">
+    <div class="ornamento"><i class="fas fa-map-marker-alt"></i></div>
+    <h2>Onde nos encontrar</h2>
+    <p>Venha viver a experiência Yoona</p>
+  </div>
+
+  <div style="max-width:700px; margin:0 auto;">
+    <div class="info-card">
+      <div class="info-card-titulo"><i class="fas fa-map-marker-alt"></i> Endereço</div>
+      <p>Avenida do Bem-Estar, 123 — Centro, Cuiabá – MT</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-titulo"><i class="fas fa-clock"></i> Horário de Funcionamento</div>
+      <p>Terça a Sábado, das 09h às 19h</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-titulo"><i class="fas fa-phone"></i> Contato</div>
+      <p>(65) 99999-0000 &nbsp;·&nbsp; contato@yoonaspa.com.br</p>
+    </div>
+
+    <div class="social-links">
+      <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

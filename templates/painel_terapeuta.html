@@ -1,300 +1,134 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% load static %}
 
-{% block title %}Painel do Terapeuta | Yoona Head Spa{% endblock title %}
+{% block title %}Minha Agenda | Yoona Head Spa{% endblock %}
 
-{% block body_class %}therapist-dashboard{% endblock body_class %}
+{% block sidebar_tipo %}Terapeuta{% endblock %}
 
-{% block extra_css %}
-<style>
-    body.therapist-dashboard {
-        background-color: #1b1f22;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        min-height: 100vh;
-        font-family: "Source Sans Pro", Helvetica, sans-serif;
-        color: #ffffff;
-    }
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Meu espaço</span>
+  <a href="#" class="ativo"><i class="fas fa-calendar-day"></i> Agenda do Dia</a>
+  <a href="#anamneses"><i class="fas fa-notes-medical"></i> Fichas de Anamnese</a>
+</div>
+{% endblock %}
 
-    .sidebar {
-        width: 260px;
-        background: rgba(0, 0, 0, 0.3);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        height: 100vh;
-        overflow-y: auto;
-    }
-
-    .sidebar-header {
-        padding: 2rem 1.5rem;
-        text-align: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar-header .icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .sidebar-header h2 {
-        font-size: 1.2rem;
-        letter-spacing: 0.2rem;
-        margin: 0;
-    }
-
-    .sidebar-header p {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.5);
-        margin: 0;
-    }
-
-    .sidebar-nav {
-        flex: 1;
-        padding: 2rem 0;
-    }
-
-    .sidebar-nav ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .sidebar-nav ul li a {
-        display: block;
-        padding: 1rem 2rem;
-        color: rgba(255, 255, 255, 0.6);
-        text-decoration: none;
-        font-weight: 600;
-        letter-spacing: 0.1rem;
-        border-bottom: none;
-        transition: all 0.2s ease;
-    }
-
-    .sidebar-nav ul li a:hover,
-    .sidebar-nav ul li a.active {
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.05);
-        border-left: 4px solid #ffffff;
-    }
-
-    .sidebar-footer {
-        padding: 1.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        text-align: center;
-    }
-
-    .main-content {
-        flex: 1;
-        margin-left: 260px;
-        padding: 3rem;
-        background: transparent;
-    }
-
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 3rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 1rem;
-    }
-
-    .dashboard-header h1 {
-        margin: 0;
-        font-size: 1.8rem;
-    }
-
-    .dashboard-section {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-        padding: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .section-header h3 {
-        margin: 0;
-    }
-
-    /* Card de Anamnese Específico */
-    .anamnese-card {
-        background: rgba(0, 0, 0, 0.2);
-        border-left: 4px solid #4CAF50;
-        padding: 1.5rem;
-        margin-top: 1.5rem;
-        border-radius: 0 4px 4px 0;
-    }
-
-    .anamnese-card h4 {
-        margin-bottom: 1rem;
-        color: #ffffff;
-    }
-
-    .anamnese-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
-    .anamnese-item label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-transform: uppercase;
-        letter-spacing: 0.1rem;
-        display: block;
-        margin-bottom: 0.2rem;
-    }
-
-    .anamnese-item p {
-        margin: 0;
-        font-weight: 600;
-    }
-
-    @media screen and (max-width: 980px) {
-        .sidebar { width: 200px; }
-        .main-content { margin-left: 200px; padding: 2rem; }
-        .anamnese-grid { grid-template-columns: 1fr; }
-    }
-
-    @media screen and (max-width: 736px) {
-        body.therapist-dashboard { flex-direction: column; }
-        .sidebar { position: relative; width: 100%; height: auto; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .main-content { margin-left: 0; padding: 1.5rem; }
-    }
-</style>
-{% endblock extra_css %}
+{% block breadcrumb %}
+  <span class="bc-atual">Agenda do Dia</span>
+{% endblock %}
 
 {% block content %}
-<!-- BARRA LATERAL -->
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <span class="icon fa-gem"></span>
-        <h2>YOONA SPA</h2>
-        <p>Área do Terapeuta</p>
-    </div>
-    
-    <nav class="sidebar-nav">
-        <ul>
-            <li><a href="#agenda" class="active"><span class="icon regular fa-calendar-alt" style="margin-right: 10px;"></span> Agenda do Dia</a></li>
-            <li><a href="#anamnese"><span class="icon solid fa-notes-medical" style="margin-right: 10px;"></span> Fichas de Anamnese</a></li>
-        </ul>
-    </nav>
 
-    <div class="sidebar-footer">
-        <a href="{% url 'logout' %}" class="button small">Sair do Sistema</a>
-    </div>
-</aside>
+<div class="page-header">
+  <h1>Minha Agenda</h1>
+  <input type="date"
+         id="filtro-data"
+         style="background:var(--surface2);color:var(--texto);border:1px solid var(--borda-sutil);padding:0.42rem 0.75rem;border-radius:var(--radius);font-size:0.8rem;font-family:inherit;"
+         aria-label="Filtrar por data" />
+</div>
 
-<!-- CONTEÚDO PRINCIPAL -->
-<main class="main-content">
-    
-    <div class="dashboard-header">
-        <h1>Minha Agenda</h1>
-        <!-- A data aqui pode ser atualizada dinamicamente pelo Django no futuro -->
-        <p>Sexta-feira, 30 de Abril de 2026</p> 
-    </div>
-
-    <!-- SEÇÃO 1: AGENDA DO DIA -->
-    <section id="agenda" class="dashboard-section">
-        <div class="section-header">
-            <h3>Próximos Atendimentos</h3>
-            <!-- Simulação de filtro de datas -->
-            <input type="date" value="2026-04-30" style="width: auto; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 4px;">
-        </div>
-        <p>Visualize seus agendamentos diários e aprove as reservas pendentes.</p>
-        
-        <div class="table-wrapper">
-            <table class="alt">
-                <thead>
-                    <tr>
-                        <th>Horário</th>
-                        <th>Paciente</th>
-                        <th>Serviço</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Exemplo: Atendimento Aprovado -->
-                    <tr>
-                        <td><strong>09:00</strong></td>
-                        <td>Mariana Costa</td>
-                        <td>Detox Capilar</td>
-                        <td style="color: #4CAF50;">Confirmado</td>
-                        <td>
-                            <a href="#anamnese" class="button small primary">Ver Ficha</a>
-                        </td>
-                    </tr>
-                    <!-- Exemplo: Atendimento Aguardando Aprovação -->
-                    <tr>
-                        <td><strong>10:30</strong></td>
-                        <td>Carlos Mendes</td>
-                        <td>Terapia Relaxante VIP</td>
-                        <td style="color: #FFC107;">Aguardando</td>
-                        <td>
-                            <ul class="actions small" style="margin: 0;">
-                                <li><a href="#" class="button small">Aprovar</a></li>
-                                <li><a href="#anamnese" class="button small primary">Ver Ficha</a></li>
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- SEÇÃO 2: CONSULTA DE ANAMNESE -->
-    <section id="anamnese" class="dashboard-section">
-        <div class="section-header">
-            <h3>Ficha de Anamnese Digital</h3>
-        </div>
-        <p>Consulte o histórico de saúde capilar do paciente antes de iniciar o procedimento para garantir a segurança e personalização do serviço.</p>
-        
-        <!-- Campo de busca rápido para simular a pesquisa de um cliente -->
-        <form method="get" action="#" style="margin-bottom: 2rem;">
-            <div class="row gtr-uniform">
-                <div class="col-9 col-12-xsmall">
-                    <input type="text" name="busca_cliente" id="busca_cliente" value="Mariana Costa" placeholder="Buscar paciente por nome ou CPF..." />
-                </div>
-                <div class="col-3 col-12-xsmall">
-                    <input type="submit" value="Buscar" class="primary fit" />
-                </div>
+<!-- Próximos atendimentos -->
+<div class="card" id="agenda">
+  <div class="card-header">
+    <h3><i class="fas fa-calendar-day" style="color:var(--gold);margin-right:0.5rem;"></i>Próximos Atendimentos</h3>
+  </div>
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Cliente</th>
+          <th>Serviço</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>09:00</strong></td>
+          <td>Mariana Costa</td>
+          <td>Detox Capilar</td>
+          <td><span class="badge badge-confirmado">Confirmado</span></td>
+          <td>
+            <a href="#anamneses" class="btn-admin btn-admin-primario btn-admin-sm">
+              <i class="fas fa-notes-medical"></i> Ver ficha
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>10:30</strong></td>
+          <td>Carlos Mendes</td>
+          <td>Terapia Relaxante VIP</td>
+          <td><span class="badge badge-aguardando">Aguardando</span></td>
+          <td>
+            <div class="btn-grupo">
+              <a href="#" class="btn-admin btn-admin-outline btn-admin-sm">
+                <i class="fas fa-check"></i> Aprovar
+              </a>
+              <a href="#anamneses" class="btn-admin btn-admin-primario btn-admin-sm">
+                <i class="fas fa-notes-medical"></i> Ficha
+              </a>
             </div>
-        </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-        <!-- Card exibindo os dados da anamnese -->
-        <div class="anamnese-card">
-            <h4>Paciente: Mariana Costa</h4>
-            <div class="anamnese-grid">
-                <div class="anamnese-item">
-                    <label>Alergias Conhecidas</label>
-                    <p>Nenhuma relatada.</p>
-                </div>
-                <div class="anamnese-item">
-                    <label>Sensibilidades</label>
-                    <p style="color: #FFC107;">Couro cabeludo sensível a atrito forte.</p>
-                </div>
-                <div class="anamnese-item">
-                    <label>Procedimentos Químicos Anteriores</label>
-                    <p>Descoloração há 3 meses.</p>
-                </div>
-                <div class="anamnese-item">
-                    <label>Preferências</label>
-                    <p>Massagem com pressão suave; prefere óleos cítricos.</p>
-                </div>
-            </div>
+<!-- Fichas de Anamnese -->
+<div class="card" id="anamneses">
+  <div class="card-header">
+    <h3><i class="fas fa-notes-medical" style="color:var(--gold);margin-right:0.5rem;"></i>Fichas de Anamnese</h3>
+  </div>
+  <div class="card-body">
+    <p style="color:var(--texto-muted);font-size:0.82rem;margin-bottom:1.25rem;">
+      Consulte o histórico do cliente antes de iniciar o procedimento.
+    </p>
+
+    <form method="get" action="#" style="margin-bottom:1.5rem;">
+      <div style="display:flex;gap:0.6rem;max-width:480px;">
+        <input type="text"
+               name="busca"
+               placeholder="Buscar cliente por nome ou CPF..."
+               style="flex:1;background:var(--surface2);border:1px solid var(--borda-sutil);color:var(--texto);padding:0.55rem 0.85rem;border-radius:var(--radius);font-family:inherit;font-size:0.82rem;" />
+        <button type="submit" class="btn-admin btn-admin-primario">
+          <i class="fas fa-search"></i> Buscar
+        </button>
+      </div>
+    </form>
+
+    <!-- Card da anamnese -->
+    <div style="background:var(--surface2);border:1px solid var(--borda-sutil);border-left:3px solid var(--gold);border-radius:var(--radius);padding:1.25rem;">
+      <p style="font-size:0.78rem;color:var(--texto-muted);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.1em;">
+        Paciente: <strong style="color:var(--texto);">Mariana Costa</strong>
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1.25rem;">
+        <div>
+          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Alergias</div>
+          <p style="margin:0;font-size:0.82rem;">Nenhuma relatada.</p>
         </div>
-    </section>
+        <div>
+          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Sensibilidades</div>
+          <p style="margin:0;font-size:0.82rem;color:#ffe082;">Couro cabeludo sensível a atrito forte.</p>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Procedimentos Anteriores</div>
+          <p style="margin:0;font-size:0.82rem;">Descoloração há 3 meses.</p>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Preferências</div>
+          <p style="margin:0;font-size:0.82rem;">Massagem com pressão suave; prefere óleos cítricos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-</main>
-{% endblock content %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('filtro-data').valueAsDate = new Date();
+</script>
+{% endblock %}

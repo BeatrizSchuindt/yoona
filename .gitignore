@@ -1,10 +1,33 @@
 # =========================
-# Python
+# Python (Geral e Empacotamento)
 # =========================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# =========================
+# Assistentes de IA
+# =========================
+.claude/
 
 # =========================
 # Ambientes Virtuais
@@ -13,6 +36,9 @@ venv/
 .venv/
 env/
 .env_venv/
+ENV/
+env.bak/
+venv.bak/
 Pipfile.lock
 poetry.lock
 
@@ -23,14 +49,21 @@ poetry.lock
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3-shm
+db.sqlite3-wal
 
 # =========================
 # Arquivos Estáticos e de Mídia
 # =========================
 # Ignore a pasta onde os arquivos estáticos são coletados para produção
 staticfiles/
+
 # Ignore os uploads de usuários (mídia) localmente
 media/
+# Dica: Se quiser manter a pasta 'media' estruturada no repositório, mas sem os arquivos dentro, 
+# você pode descomentar as linhas abaixo:
+# media/*
+# !media/.gitkeep
 
 # =========================
 # Segurança / Variáveis de Ambiente
@@ -38,6 +71,7 @@ media/
 .env
 .env.local
 .env.*.local
+.secrets
 
 # =========================
 # Testes e Cobertura
@@ -46,17 +80,44 @@ media/
 htmlcov/
 .pytest_cache/
 .tox/
+.noscript/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
 
 # =========================
-# IDEs e Editores
+# Frontend / Pacotes (Caso use Tailwind, NPM, Webpack, etc.)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# =========================
+# Celery e Filas de Trabalho (Se aplicável)
+# =========================
+celerybeat-schedule
+celerybeat-schedule.db
+
+# =========================
+# IDEs, Editores e Ferramentas
 # =========================
 .vscode/
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
+*~
+*.sublime-project
+*.sublime-workspace
 
 # =========================
 # Sistema Operacional
 # =========================
 .DS_Store
 Thumbs.db
+ehthumbs.db
+IconRoman

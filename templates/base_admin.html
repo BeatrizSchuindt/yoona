@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Painel | Yoona Head Spa{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome-all.min.css' %}" />
+
+  <!-- Yoona Admin CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/yoona-admin.css' %}" />
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Menu lateral">
+
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icone"><i class="fas fa-spa"></i></div>
+      <div>
+        <span class="sidebar-brand-nome">YOON·A</span>
+        <span class="sidebar-brand-tipo">{% block sidebar_tipo %}Painel{% endblock %}</span>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">{{ user.username|first|upper }}</div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-nome">{{ user.get_full_name|default:user.username }}</span>
+        <span class="sidebar-user-cargo">{% if user.is_staff %}Administrador{% else %}Terapeuta{% endif %}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <nav class="sidebar-nav">
+      {% block sidebar_nav %}
+      <!-- sobrescrito pelos painéis específicos -->
+      {% endblock %}
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="{% url 'logout' %}">
+        <i class="fas fa-sign-out-alt"></i> Sair do sistema
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- OVERLAY MOBILE -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="admin-main">
+
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="topbar-esquerda">
+        <button class="btn-toggle-sidebar" id="btn-toggle-sidebar" aria-label="Alternar menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <nav class="breadcrumb" aria-label="Trilha de navegação">
+          {% block breadcrumb %}
+          <a href="#">Início</a>
+          {% endblock %}
+        </nav>
+      </div>
+      <div class="topbar-direita">
+        {% block topbar_direita %}{% endblock %}
+      </div>
+    </header>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+      <div class="admin-messages" role="alert" aria-live="polite">
+        {% for msg in messages %}
+          <div class="alert alert-{{ msg.tags }}">
+            {% if msg.tags == 'success' %}<i class="fas fa-check-circle"></i>
+            {% elif msg.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>
+            {% elif msg.tags == 'warning' %}<i class="fas fa-exclamation-triangle"></i>
+            {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+            {{ msg }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- CONTEÚDO DA PÁGINA -->
+    <main class="admin-content" id="conteudo-principal">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div><!-- /.admin-main -->
+
+</div><!-- /.admin-layout -->
+
+<!-- JS Sidebar toggle -->
+<script>
+  (function () {
+    const sidebar  = document.getElementById('admin-sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    const btnToggle = document.getElementById('btn-toggle-sidebar');
+
+    function abrirSidebar() {
+      sidebar.classList.add('aberta');
+      overlay.classList.add('visivel');
+      document.body.style.overflow = 'hidden';
+    }
+    function fecharSidebar() {
+      sidebar.classList.remove('aberta');
+      overlay.classList.remove('visivel');
+      document.body.style.overflow = '';
+    }
+
+    if (btnToggle) btnToggle.addEventListener('click', abrirSidebar);
+    if (overlay)   overlay.addEventListener('click', fecharSidebar);
+  })();
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
