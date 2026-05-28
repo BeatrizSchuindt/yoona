@@ -82,12 +82,14 @@
             </td>
             <td>
               <div class="btn-grupo">
-                <a href="#" class="btn-admin btn-admin-outline btn-admin-sm">
+                <a href="{% url 'servicos:editar_terapia' servico.pk %}" class="btn-admin btn-admin-outline btn-admin-sm">
                   <i class="fas fa-pen"></i> Editar
                 </a>
-                <a href="#" class="btn-admin btn-admin-perigo btn-admin-sm">
+                <button type="button"
+                        class="btn-admin btn-admin-perigo btn-admin-sm"
+                        onclick="abrirModalExclusao('{{ servico.pk }}', '{{ servico.nome|escapejs }}')">
                   <i class="fas fa-trash"></i> Excluir
-                </a>
+                </button>
               </div>
             </td>
           </tr>
@@ -148,5 +150,64 @@
 
   </div>
 </div>
+
+<!-- ===== MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ===== -->
+<div id="modal-exclusao" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;">
+  <!-- Overlay -->
+  <div onclick="fecharModalExclusao()"
+       style="position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);"></div>
+
+  <!-- Caixa do modal -->
+  <div style="position:relative;background:var(--superficie);border:1px solid var(--borda-sutil);border-radius:12px;padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <!-- Ícone de alerta -->
+    <div style="width:52px;height:52px;border-radius:50%;background:rgba(220,53,69,0.12);border:1px solid rgba(220,53,69,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.4rem;color:#f08080;">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+
+    <h3 style="text-align:center;margin-bottom:0.5rem;font-size:1.05rem;">Remover terapia?</h3>
+    <p style="text-align:center;color:var(--texto-muted);font-size:0.85rem;margin-bottom:0.25rem;">
+      Você está prestes a remover:
+    </p>
+    <p id="modal-nome-servico"
+       style="text-align:center;font-weight:600;color:var(--texto);font-size:0.95rem;margin-bottom:1.5rem;"></p>
+    <p style="text-align:center;color:var(--texto-muted);font-size:0.78rem;margin-bottom:1.75rem;">
+      Se houver agendamentos vinculados, a remoção será bloqueada automaticamente.
+    </p>
+
+    <!-- Formulário POST oculto -->
+    <form id="form-exclusao" method="post" action="">
+      {% csrf_token %}
+      <div style="display:flex;gap:0.75rem;justify-content:center;">
+        <button type="button" onclick="fecharModalExclusao()"
+                class="btn-admin btn-admin-outline">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-admin btn-admin-perigo">
+          <i class="fas fa-trash"></i> Sim, remover
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalExclusao(pk, nome) {
+    document.getElementById('modal-nome-servico').textContent = nome;
+    document.getElementById('form-exclusao').action = '/painel/admin/terapias/' + pk + '/remover/';
+    const modal = document.getElementById('modal-exclusao');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModalExclusao() {
+    document.getElementById('modal-exclusao').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Fechar com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModalExclusao();
+  });
+</script>
 
 {% endblock %}

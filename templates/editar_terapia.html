@@ -1,0 +1,127 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Editar Terapia | Yoona Head Spa{% endblock %}
+
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}" class="ativo">
+    <i class="fas fa-spa"></i> Terapias e Serviços
+  </a>
+  <a href="#"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="#"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="#"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Terapias e Serviços</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Editar Terapia</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Editar Terapia: <em style="color:var(--gold);font-style:normal;">{{ object.nome }}</em></h1>
+  <a href="{% url 'servicos:painel_admin' %}" class="btn-admin btn-admin-outline">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-spa" style="color:var(--gold);margin-right:0.5rem;"></i>Dados da Terapia</h3>
+  </div>
+  <div class="card-body">
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="form-admin">
+
+        <!-- Nome -->
+        <div class="form-group">
+          <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }} *</label>
+          {{ form.nome }}
+          {{ form.nome.errors }}
+        </div>
+
+        <!-- Descrição -->
+        <div class="form-group">
+          <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }} *</label>
+          {{ form.descricao }}
+          {{ form.descricao.errors }}
+        </div>
+
+        <!-- Duração + Preço -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.duracao.id_for_label }}">{{ form.duracao.label }} (min) *</label>
+            {{ form.duracao }}
+            {{ form.duracao.errors }}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.preco_base.id_for_label }}">{{ form.preco_base.label }} (R$) *</label>
+            {{ form.preco_base }}
+            {{ form.preco_base.errors }}
+          </div>
+        </div>
+
+        <!-- Imagem -->
+        <div class="form-group">
+          <label for="{{ form.imagem.id_for_label }}">{{ form.imagem.label }}</label>
+          {% if object.imagem %}
+            <div style="margin-bottom:0.6rem;">
+              <img src="{{ object.imagem.url }}" alt="Imagem atual"
+                   style="height:80px;border-radius:8px;border:1px solid var(--borda-sutil);object-fit:cover;">
+              <span style="font-size:0.72rem;color:var(--texto-muted);margin-left:0.5rem;">Imagem atual</span>
+            </div>
+          {% endif %}
+          {{ form.imagem }}
+          {{ form.imagem.errors }}
+          {% if form.imagem.help_text %}
+            <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">{{ form.imagem.help_text }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Status de disponibilidade -->
+        <div class="form-group">
+          <label for="{{ form.ativo.id_for_label }}">{{ form.ativo.label }}</label>
+          {{ form.ativo }}
+          {{ form.ativo.errors }}
+          <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">
+            Serviços "Inativos" ficam visíveis para o administrador, mas não aparecem para os clientes.
+          </span>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="form-erros" style="margin-top:1rem;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <!-- Ações -->
+        <div class="form-acoes">
+          <a href="{% url 'servicos:painel_admin' %}" class="btn-admin btn-admin-outline">
+            Cancelar
+          </a>
+          <button type="submit" class="btn-admin btn-admin-primario btn-admin-lg">
+            <i class="fas fa-save"></i> Salvar alterações
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
