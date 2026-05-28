@@ -33,15 +33,38 @@ class AdminStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 class ServicoAdminListView(AdminStaffRequiredMixin, ListView):
     """
     Painel de Gestão: Lista todas as terapias (ativas e inativas).
-    Requisito: Paginação de 10 registros por página.
+    Suporta paginação configurável via ?por_pagina=10|20|50.
     """
     model = Servico
     template_name = 'painel_admin.html'
     context_object_name = 'terapias_admin'
-    paginate_by = 10 
+
+    OPCOES_POR_PAGINA = [10, 20, 50]
+    DEFAULT_POR_PAGINA = 10
+
+    def get_paginate_by(self, queryset):
+        try:
+            por_pagina = int(self.request.GET.get('por_pagina', self.DEFAULT_POR_PAGINA))
+            if por_pagina in self.OPCOES_POR_PAGINA:
+                return por_pagina
+        except (ValueError, TypeError):
+            pass
+        return self.DEFAULT_POR_PAGINA
 
     def get_queryset(self):
         return Servico.objects.all().order_by('nome')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        por_pagina = self.get_paginate_by(self.get_queryset())
+        page_obj   = context['page_obj']
+        # Índices para o contador "Mostrando de X até Y de Z"
+        context['por_pagina']      = por_pagina
+        context['opcoes_pagina']   = self.OPCOES_POR_PAGINA
+        context['indice_inicio']   = page_obj.start_index()
+        context['indice_fim']      = page_obj.end_index()
+        context['total_registros'] = page_obj.paginator.count
+        return context
 
 
 class ServicoCreateView(AdminStaffRequiredMixin, CreateView):

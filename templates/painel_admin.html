@@ -1,7 +1,7 @@
 {% extends 'base_admin.html' %}
 {% load static %}
 
-{% block title %}Gestão de Terapias | Yoona Head Spa{% endblock %}
+{% block title %}Gestão de Terapias e Serviços | Yoona Head Spa{% endblock %}
 
 {% block sidebar_tipo %}Administrador{% endblock %}
 
@@ -32,7 +32,7 @@
 {% block content %}
 
 <div class="page-header">
-  <h1>Terapias e Serviços</h1>
+  <h1>Gestão de Terapias e Serviços</h1>
   <a href="{% url 'servicos:nova_terapia' %}" class="btn-admin btn-admin-primario">
     <i class="fas fa-plus"></i> Nova terapia
   </a>
@@ -41,9 +41,21 @@
 <div class="card">
   <div class="card-header">
     <h3>Catálogo cadastrado</h3>
-    <span style="font-size:0.75rem;color:var(--texto-muted);">
-      {{ terapias_admin.paginator.count }} registro{{ terapias_admin.paginator.count|pluralize }}
-    </span>
+
+    <!-- Seletor de registros por página -->
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--texto-muted);">
+      <span>Exibir</span>
+      <div style="display:flex;gap:0.25rem;">
+        {% for opcao in opcoes_pagina %}
+          <a href="?por_pagina={{ opcao }}"
+             style="padding:0.2rem 0.5rem;border-radius:4px;border:1px solid {% if por_pagina == opcao %}var(--gold){% else %}var(--borda-sutil){% endif %};color:{% if por_pagina == opcao %}var(--gold){% else %}var(--texto-muted){% endif %};font-size:0.72rem;transition:all 0.15s;"
+             aria-label="{{ opcao }} registros por página">
+            {{ opcao }}
+          </a>
+        {% endfor %}
+      </div>
+      <span>por página</span>
+    </div>
   </div>
 
   <div class="table-wrapper">
@@ -95,29 +107,46 @@
     </table>
   </div>
 
-  {% if terapias_admin.has_other_pages %}
-    <div style="padding:0.75rem 1.5rem;border-top:1px solid var(--borda-sutil);">
+  <!-- Rodapé: contador + paginação -->
+  <div style="padding:0.85rem 1.5rem;border-top:1px solid var(--borda-sutil);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+
+    <!-- Contador por extenso -->
+    <span style="font-size:0.75rem;color:var(--texto-muted);">
+      {% if total_registros > 0 %}
+        Mostrando de {{ indice_inicio }} até {{ indice_fim }}
+        de <strong style="color:var(--texto);">{{ total_registros }}</strong>
+        terapia{{ total_registros|pluralize }} cadastrada{{ total_registros|pluralize }}
+      {% else %}
+        Nenhuma terapia cadastrada.
+      {% endif %}
+    </span>
+
+    <!-- Botões de paginação -->
+    {% if terapias_admin.has_other_pages %}
       <div class="paginacao">
         {% if terapias_admin.has_previous %}
-          <a href="?page={{ terapias_admin.previous_page_number }}">
+          <a href="?por_pagina={{ por_pagina }}&page={{ terapias_admin.previous_page_number }}">
             <i class="fas fa-chevron-left"></i>
           </a>
         {% endif %}
+
         {% for num in terapias_admin.paginator.page_range %}
           {% if terapias_admin.number == num %}
             <span class="pagina-atual">{{ num }}</span>
           {% else %}
-            <a href="?page={{ num }}">{{ num }}</a>
+            <a href="?por_pagina={{ por_pagina }}&page={{ num }}">{{ num }}</a>
           {% endif %}
         {% endfor %}
+
         {% if terapias_admin.has_next %}
-          <a href="?page={{ terapias_admin.next_page_number }}">
+          <a href="?por_pagina={{ por_pagina }}&page={{ terapias_admin.next_page_number }}">
             <i class="fas fa-chevron-right"></i>
           </a>
         {% endif %}
       </div>
-    </div>
-  {% endif %}
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}

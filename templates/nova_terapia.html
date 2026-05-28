@@ -87,15 +87,15 @@
           {% endif %}
         </div>
 
-        <!-- Status -->
-        <div class="form-check">
+        <!-- Status de disponibilidade -->
+        <div class="form-group">
+          <label for="{{ form.ativo.id_for_label }}">{{ form.ativo.label }}</label>
           {{ form.ativo }}
-          <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
-            {{ form.ativo.label }}
-            <span class="form-check-desc">Terapia visível no catálogo público para agendamento.</span>
-          </label>
+          {{ form.ativo.errors }}
+          <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">
+            Serviços "Inativos" ficam visíveis para o administrador, mas não aparecem para os clientes.
+          </span>
         </div>
-        {{ form.ativo.errors }}
 
         {% if form.non_field_errors %}
           <div class="form-erros" style="margin-top:1rem;">{{ form.non_field_errors }}</div>

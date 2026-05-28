@@ -32,10 +32,9 @@ class ServicoForm(forms.ModelForm):
             'imagem': forms.ClearableFileInput(attrs={
                 'class': 'form-control'
             }),
-            'ativo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input',
-                'role': 'switch'
-            }),
+            'ativo': forms.Select(attrs={
+                'class': 'form-control',
+            }, choices=[(True, 'Ativo'), (False, 'Inativo')]),
         }
 
     # TOdo: verificar validações depois
