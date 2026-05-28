@@ -42,8 +42,7 @@ class IdentificacaoView(View):
                     f'Bem-vinda, {cliente.nome_completo.split()[0]}! '
                     'Cadastro realizado. Agora escolha o serviço e horário.'
                 )
-                # US04 ainda não existe; redireciona para home até ser implementada
-                return redirect('servicos:home')
+                return redirect('agendamentos:solicitacao')
 
             # Formulário de cadastro inválido → re-renderiza com erros
             return render(request, self.template_name, {
@@ -68,8 +67,7 @@ class IdentificacaoView(View):
                 f'Olá, {cliente.nome_completo.split()[0]}! '
                 'Identificação confirmada. Agora escolha o serviço e horário.'
             )
-            # US04 ainda não existe; redireciona para home até ser implementada
-            return redirect('servicos:home')
+            return redirect('agendamentos:solicitacao')
 
         except Cliente.DoesNotExist:
             # Novo cliente — exibe campos extras

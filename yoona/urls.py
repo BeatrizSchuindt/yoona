@@ -28,6 +28,9 @@ urlpatterns = [
 
     # --- INCLUSÃO DAS ROTAS DO APP CLIENTES ---
     path('', include('clientes.urls')),
+
+    # --- INCLUSÃO DAS ROTAS DO APP AGENDAMENTOS ---
+    path('', include('agendamentos.urls')),
     
     # Rota mantida no roteador central por enquanto (até você criar o app de atendimentos)
     path('painel/terapeuta/', views.painel_terapeuta, name='painel_terapeuta'),

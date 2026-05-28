@@ -93,6 +93,12 @@ class Agendamento(models.Model):
         ('concluido',   'Concluído'),
         ('cancelado',   'Cancelado'),
     ]
+    PAGAMENTO_CHOICES = [
+        ('pix',      'PIX'),
+        ('credito',  'Cartão de Crédito'),
+        ('debito',   'Cartão de Débito'),
+        ('dinheiro', 'Dinheiro'),
+    ]
 
     cliente = models.ForeignKey(
         Cliente,
@@ -125,6 +131,13 @@ class Agendamento(models.Model):
     )
     data_agendamento = models.DateField(verbose_name='Data')
     horario_agendamento = models.TimeField(verbose_name='Horário')
+    metodo_pagamento = models.CharField(
+        max_length=10,
+        choices=PAGAMENTO_CHOICES,
+        default='pix',
+        verbose_name='Método de pagamento',
+        help_text='Forma de pagamento escolhida pelo cliente no ato do agendamento.',
+    )
     status = models.CharField(
         max_length=12,
         choices=STATUS_CHOICES,
