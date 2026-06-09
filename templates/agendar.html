@@ -1,0 +1,423 @@
+{% extends 'base_cliente.html' %}
+{% load static %}
+
+{% block title %}Agendar Terapia | Yoona Head Spa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+  /* Integração visual do Flatpickr com o tema Yoona */
+  .flatpickr-calendar { font-family: 'Inter', sans-serif; border-radius: 12px; box-shadow: 0 8px 32px rgba(12,53,40,0.15); border: 1px solid #e5e7eb; }
+  .flatpickr-day.selected, .flatpickr-day.selected:hover { background: #0C3528; border-color: #0C3528; color: #C9A84C; font-weight: 600; }
+  .flatpickr-day:hover { background: rgba(201,168,76,0.12); border-color: transparent; }
+  .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color: #d1d5db; background: transparent; cursor: not-allowed; text-decoration: line-through; }
+  .flatpickr-months .flatpickr-month { background: #0C3528; color: #C9A84C; border-radius: 12px 12px 0 0; }
+  .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: #C9A84C; fill: #C9A84C; }
+  .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg { fill: #fff; }
+  .flatpickr-current-month .flatpickr-monthDropdown-months { color: #C9A84C; background: #0C3528; }
+  .flatpickr-current-month input.cur-year { color: #C9A84C; }
+  .flatpickr-weekday { color: #6b7280; font-weight: 600; font-size: 0.75rem; }
+  .flatpickr-weekdays { background: #f9fafb; }
+  /* Domingo (col 0) em vermelho-acinzentado para indicar fechado */
+  .flatpickr-days .flatpickr-day:nth-child(7n+1) { color: #fca5a5; }
+  .flatpickr-days .flatpickr-day.flatpickr-disabled:nth-child(7n+1) { color: #fca5a5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section style="padding:3rem 1rem 4rem;max-width:680px;margin:0 auto;">
+
+  <!-- Cabeçalho -->
+  <div style="text-align:center;margin-bottom:2rem;">
+    <span style="display:inline-flex;align-items:center;justify-content:center;
+                 width:56px;height:56px;border-radius:50%;
+                 background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);
+                 font-size:1.4rem;color:#C9A84C;margin-bottom:1rem;">
+      <i class="fas fa-calendar-check"></i>
+    </span>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;
+               color:#0C3528;margin-bottom:0.3rem;">Agende sua Terapia</h1>
+    <p style="color:#6b7280;font-size:0.875rem;">
+      Olá, <strong>{{ cliente.nome_completo }}</strong>! Escolha sua terapia e horário.
+    </p>
+  </div>
+
+  <!-- Erros globais -->
+  {% if form.non_field_errors %}
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+                padding:0.85rem 1rem;margin-bottom:1.5rem;color:#dc2626;font-size:0.85rem;">
+      <i class="fas fa-exclamation-circle" style="margin-right:0.4rem;"></i>
+      {% for erro in form.non_field_errors %}{{ erro }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" id="form-agendamento" novalidate>
+    {% csrf_token %}
+    <!-- campo hidden para horário e pagamento (preenchido via JS) -->
+    <input type="hidden" name="horario_agendamento" id="horario_agendamento">
+    <input type="hidden" name="metodo_pagamento"    id="metodo_pagamento">
+
+    <!-- ── PASSO 1: Serviço ───────────────────────────────────────────── -->
+    <div class="ag-card" id="card-servico">
+      <div class="ag-card-titulo">
+        <span class="ag-num">1</span> Escolha a terapia
+      </div>
+
+      <select name="servico" id="id_servico" class="ag-select" required>
+        <option value="">Selecione a terapia…</option>
+        {% for s in servicos %}
+          <option value="{{ s.pk }}"
+                  data-duracao="{{ s.duracao }}"
+                  data-preco="{{ s.preco_base }}"
+                  {% if form.servico.value == s.pk|stringformat:"s" %}selected{% endif %}>
+            {{ s.nome }} — {{ s.duracao }} min · R$ {{ s.preco_base }}
+          </option>
+        {% endfor %}
+      </select>
+      {% if form.servico.errors %}
+        <p class="ag-erro">{{ form.servico.errors|join:" " }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── PASSO 2: Data ─────────────────────────────────────────────── -->
+    <div class="ag-card">
+      <div class="ag-card-titulo">
+        <span class="ag-num">2</span> Escolha a data
+      </div>
+      <input type="text" name="data_agendamento" id="id_data"
+             class="ag-input-data"
+             placeholder="Selecione uma data"
+             value="{{ form.data_agendamento.value|default:'' }}"
+             readonly
+             required>
+      {% if form.data_agendamento.errors %}
+        <p class="ag-erro">{{ form.data_agendamento.errors|join:" " }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── PASSO 3: Horário ──────────────────────────────────────────── -->
+    <div class="ag-card">
+      <div class="ag-card-titulo">
+        <span class="ag-num">3</span> Escolha o horário
+      </div>
+      <div id="grade-horarios" style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.25rem;">
+        <p style="color:#9ca3af;font-size:0.85rem;" id="msg-horarios">
+          Selecione uma data para ver os horários disponíveis.
+        </p>
+      </div>
+      {% if form.horario_agendamento.errors %}
+        <p class="ag-erro">{{ form.horario_agendamento.errors|join:" " }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── PASSO 4: Pagamento ────────────────────────────────────────── -->
+    <div class="ag-card">
+      <div class="ag-card-titulo">
+        <span class="ag-num">4</span> Como vai pagar no dia?
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-top:0.25rem;">
+        {% for valor, label in pagamento_choices %}
+          <button type="button"
+                  class="ag-pgto-btn"
+                  data-valor="{{ valor }}"
+                  onclick="selecionarPagamento(this, '{{ valor }}')">
+            {% if valor == 'pix' %}<i class="fas fa-qrcode"></i>
+            {% elif valor == 'credito' %}<i class="fas fa-credit-card"></i>
+            {% elif valor == 'debito' %}<i class="fas fa-credit-card"></i>
+            {% else %}<i class="fas fa-money-bill-wave"></i>{% endif %}
+            {{ label }}
+          </button>
+        {% endfor %}
+      </div>
+      {% if form.metodo_pagamento.errors %}
+        <p class="ag-erro" id="erro-pagamento">{{ form.metodo_pagamento.errors|join:" " }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── RESUMO ────────────────────────────────────────────────────── -->
+    <div class="ag-card" id="resumo" style="display:none;background:#f0fdf4;
+         border-color:#bbf7d0;">
+      <div class="ag-card-titulo" style="color:#166534;">
+        <i class="fas fa-check-circle" style="margin-right:0.4rem;"></i> Resumo do agendamento
+      </div>
+      <div style="display:grid;gap:0.4rem;font-size:0.875rem;color:#374151;margin-top:0.5rem;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#6b7280;">Terapia</span>
+          <strong id="res-servico">—</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#6b7280;">Duração</span>
+          <strong id="res-duracao">—</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#6b7280;">Data e horário</span>
+          <strong id="res-data-hora">—</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#6b7280;">Pagamento</span>
+          <strong id="res-pagamento">—</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid #bbf7d0;padding-top:0.5rem;margin-top:0.25rem;">
+          <span style="color:#6b7280;">Valor base</span>
+          <strong id="res-preco" style="color:#0C3528;font-size:1rem;">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão confirmar -->
+    <button type="submit" id="btn-confirmar"
+            style="width:100%;padding:0.9rem;margin-top:0.5rem;border:none;border-radius:10px;
+                   background:#0C3528;color:#C9A84C;font-size:1rem;font-weight:600;
+                   cursor:pointer;display:flex;align-items:center;justify-content:center;
+                   gap:0.6rem;transition:opacity 0.2s;opacity:0.45;pointer-events:none;">
+      <i class="fas fa-calendar-check"></i> Confirmar Agendamento
+    </button>
+  </form>
+
+  <div style="text-align:center;margin-top:1.25rem;">
+    <a href="{% url 'clientes:identificacao' %}"
+       style="font-size:0.8rem;color:#6b7280;text-decoration:none;">
+      <i class="fas fa-arrow-left" style="margin-right:0.3rem;"></i> Voltar à identificação
+    </a>
+  </div>
+
+</section>
+
+<!-- ===== ESTILOS ===== -->
+<style>
+  .ag-card {
+    background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+    padding:1.25rem 1.5rem;margin-bottom:1rem;
+  }
+  .ag-card-titulo {
+    font-weight:600;color:#0C3528;font-size:0.9rem;
+    display:flex;align-items:center;gap:0.6rem;margin-bottom:0.85rem;
+  }
+  .ag-num {
+    display:inline-flex;align-items:center;justify-content:center;
+    width:24px;height:24px;border-radius:50%;background:#0C3528;
+    color:#C9A84C;font-size:0.75rem;font-weight:700;flex-shrink:0;
+  }
+  .ag-select, .ag-input-data {
+    width:100%;padding:0.7rem 0.9rem;border:1px solid #d1d5db;border-radius:8px;
+    font-size:0.95rem;color:#111827;background:#f9fafb;box-sizing:border-box;
+    outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+  }
+  .ag-select:focus, .ag-input-data:focus {
+    border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,0.15);background:#fff;
+  }
+  .ag-slot-btn {
+    padding:0.5rem 1rem;border:1px solid #d1d5db;border-radius:8px;
+    background:#fff;color:#374151;font-size:0.85rem;cursor:pointer;
+    transition:all 0.15s;
+  }
+  .ag-slot-btn:hover { border-color:#C9A84C;color:#0C3528; }
+  .ag-slot-btn.selecionado {
+    background:#0C3528;color:#C9A84C;border-color:#0C3528;font-weight:600;
+  }
+  .ag-slot-btn:disabled {
+    background:#f3f4f6;color:#9ca3af;border-color:#e5e7eb;cursor:not-allowed;
+  }
+  .ag-pgto-btn {
+    padding:0.75rem;border:1px solid #d1d5db;border-radius:10px;
+    background:#fff;color:#374151;font-size:0.85rem;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+    transition:all 0.15s;
+  }
+  .ag-pgto-btn i { font-size:1.2rem;color:#9ca3af; }
+  .ag-pgto-btn:hover { border-color:#C9A84C; }
+  .ag-pgto-btn.selecionado {
+    background:#0C3528;color:#C9A84C;border-color:#0C3528;
+  }
+  .ag-pgto-btn.selecionado i { color:#C9A84C; }
+  .ag-erro { color:#dc2626;font-size:0.78rem;margin-top:0.35rem; }
+  #btn-confirmar:not([disabled]):not([style*="pointer-events:none"]):hover { opacity:0.85; }
+</style>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+  // ── Estado da seleção ────────────────────────────────────────────────────
+  const estado = {
+    servico:    { nome:'', duracao:'', preco:'' },
+    data:       '',
+    hora:       '',
+    pagamento:  { valor:'', label:'' },
+  };
+
+  // Slots pré-carregados para a data de hoje (passados pelo Django)
+  const slotsIniciais = {{ slots_iniciais|safe }};
+
+  // ── Utilitários ─────────────────────────────────────────────────────────
+  function formatarData(iso) {
+    if (!iso) return '';
+    const [a, m, d] = iso.split('-');
+    return `${d}/${m}/${a}`;
+  }
+
+  function verificarResumo() {
+    const ok = estado.servico.nome && estado.data && estado.hora && estado.pagamento.valor;
+    const resumo = document.getElementById('resumo');
+    const btn    = document.getElementById('btn-confirmar');
+    if (ok) {
+      document.getElementById('res-servico').textContent  = estado.servico.nome;
+      document.getElementById('res-duracao').textContent  = estado.servico.duracao + ' min';
+      document.getElementById('res-data-hora').textContent = formatarData(estado.data) + ' às ' + estado.hora;
+      document.getElementById('res-pagamento').textContent = estado.pagamento.label;
+      document.getElementById('res-preco').textContent    = 'R$ ' + estado.servico.preco;
+      resumo.style.display = 'block';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    } else {
+      resumo.style.display = 'none';
+      btn.style.opacity = '0.45';
+      btn.style.pointerEvents = 'none';
+    }
+  }
+
+  // ── Serviço ──────────────────────────────────────────────────────────────
+  document.getElementById('id_servico').addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    if (opt.value) {
+      estado.servico = {
+        nome: opt.text.split(' — ')[0],
+        duracao: opt.dataset.duracao,
+        preco: opt.dataset.preco,
+      };
+    } else {
+      estado.servico = { nome:'', duracao:'', preco:'' };
+    }
+    verificarResumo();
+  });
+
+  // ── Data: controlada pelo Flatpickr (inicializado no extra_js) ──────────
+  function aoSelecionarData(dateStr) {
+    estado.data = dateStr;
+    estado.hora = '';
+    document.getElementById('horario_agendamento').value = '';
+    carregarHorarios(dateStr);
+    verificarResumo();
+  }
+
+  // ── Grade de horários ────────────────────────────────────────────────────
+  function renderizarGrade(slots) {
+    const grade = document.getElementById('grade-horarios');
+    grade.innerHTML = '';
+
+    if (!slots || slots.length === 0) {
+      grade.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem;">Nenhum horário disponível para esta data.</p>';
+      return;
+    }
+
+    // Todos os slots possíveis (para mostrar indisponíveis)
+    const todosSlots = [];
+    for (let h = 9; h <= 18; h++) {
+      todosSlots.push(String(h).padStart(2,'0') + ':00');
+    }
+
+    todosSlots.forEach(slot => {
+      const disponivel = slots.includes(slot);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = slot;
+      btn.className = 'ag-slot-btn';
+      if (!disponivel) {
+        btn.disabled = true;
+        btn.textContent = slot + ' · Indisponível';
+        btn.style.fontSize = '0.78rem';
+      } else {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.ag-slot-btn').forEach(b => b.classList.remove('selecionado'));
+          this.classList.add('selecionado');
+          estado.hora = slot;
+          document.getElementById('horario_agendamento').value = slot + ':00';
+          verificarResumo();
+        });
+      }
+      grade.appendChild(btn);
+    });
+  }
+
+  function carregarHorarios(data) {
+    if (!data) return;
+    const grade = document.getElementById('grade-horarios');
+    grade.innerHTML = '<p style="color:#9ca3af;font-size:0.85rem;"><i class="fas fa-spinner fa-spin"></i> Verificando disponibilidade…</p>';
+
+    fetch(`{% url 'agendamentos:horarios_disponiveis' %}?data=${data}`)
+      .then(r => r.json())
+      .then(json => renderizarGrade(json.disponiveis))
+      .catch(() => {
+        grade.innerHTML = '<p style="color:#dc2626;font-size:0.85rem;">Erro ao buscar horários. Tente novamente.</p>';
+      });
+  }
+
+  // ── Pagamento ────────────────────────────────────────────────────────────
+  function selecionarPagamento(btn, valor) {
+    document.querySelectorAll('.ag-pgto-btn').forEach(b => b.classList.remove('selecionado'));
+    btn.classList.add('selecionado');
+    estado.pagamento = { valor: valor, label: btn.textContent.trim() };
+    document.getElementById('metodo_pagamento').value = valor;
+    verificarResumo();
+  }
+
+  // ── Inicialização: carrega horários para a data atual ────────────────────
+  (function () {
+    const dataInput = document.getElementById('id_data');
+    if (dataInput.value) {
+      estado.data = dataInput.value;
+      renderizarGrade(slotsIniciais);
+    }
+
+    // Restaura seleções após erro de validação (POST com dados)
+    const horaHidden = '{{ form.horario_agendamento.value|default:"" }}';
+    const pgtoHidden = '{{ form.metodo_pagamento.value|default:"" }}';
+
+    if (horaHidden) {
+      estado.hora = horaHidden.slice(0,5);
+      document.getElementById('horario_agendamento').value = horaHidden;
+    }
+    if (pgtoHidden) {
+      document.querySelectorAll('.ag-pgto-btn').forEach(btn => {
+        if (btn.dataset.valor === pgtoHidden) {
+          btn.classList.add('selecionado');
+          estado.pagamento = { valor: pgtoHidden, label: btn.textContent.trim() };
+          document.getElementById('metodo_pagamento').value = pgtoHidden;
+        }
+      });
+    }
+
+    verificarResumo();
+  })();
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+  // Bloqueios vindos do Django (dias da semana em weekday() Python: 0=Seg … 6=Dom)
+  const diasBloqueadosPy   = {{ dias_semana_bloqueados|safe }};
+  const datasEspecificas   = {{ datas_especificas|safe }};
+
+  // Converte para JS getDay() (0=Dom, 1=Seg … 6=Sab): py → js = (py + 1) % 7
+  const diasBloqueadosJS = diasBloqueadosPy.map(d => (d + 1) % 7);
+
+  flatpickr('#id_data', {
+    locale: 'pt',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
+    minDate: 'today',
+    disable: [
+      ...datasEspecificas,
+      function(date) {
+        return diasBloqueadosJS.includes(date.getDay());
+      }
+    ],
+    onChange: function(selectedDates, dateStr) {
+      aoSelecionarData(dateStr);
+    },
+    defaultDate: '{{ form.data_agendamento.value|default:"" }}' || null,
+  });
+</script>
+{% endblock %}

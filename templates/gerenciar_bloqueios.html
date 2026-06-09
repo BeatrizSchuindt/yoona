@@ -1,0 +1,176 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Bloqueios de Agenda | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}">
+    <i class="fas fa-spa"></i> Terapias e Serviços
+  </a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}" class="ativo">
+    <i class="fas fa-calendar-times"></i> Bloqueios de Agenda
+  </a>
+  <a href="#"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="#"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Painel</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Bloqueios de Agenda</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Bloqueios de Agenda</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start;">
+
+  <!-- ── Lista de bloqueios ────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-ban" style="color:var(--gold);margin-right:0.5rem;"></i>Dias e datas bloqueadas</h3>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Dia / Data</th>
+            <th>Motivo</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bloqueios %}
+            <tr>
+              <td>
+                {% if b.tipo == 'dia_semana' %}
+                  <span class="badge badge-ativo">Recorrente</span>
+                {% else %}
+                  <span class="badge" style="background:rgba(201,168,76,0.15);color:#92610a;border:1px solid rgba(201,168,76,0.3);">Data única</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if b.tipo == 'dia_semana' %}
+                  <strong>{{ b.get_dia_semana_display }}</strong>
+                {% else %}
+                  <strong>{{ b.data|date:"d/m/Y" }}</strong>
+                {% endif %}
+              </td>
+              <td style="color:var(--texto-muted);">{{ b.motivo|default:"—" }}</td>
+              <td>
+                <form method="post"
+                      action="{% url 'agendamentos:remover_bloqueio' b.pk %}"
+                      onsubmit="return confirm('Remover este bloqueio?')">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-admin btn-admin-perigo btn-admin-sm">
+                    <i class="fas fa-trash"></i> Remover
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="tabela-vazia">
+                <i class="fas fa-calendar-check" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+                Nenhum bloqueio configurado. O spa aceita agendamentos em todos os dias.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Formulário de adição ──────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-plus-circle" style="color:var(--gold);margin-right:0.5rem;"></i>Adicionar bloqueio</h3>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-admin">
+
+          <!-- Tipo -->
+          <div class="form-group">
+            <label for="{{ form.tipo.id_for_label }}">Tipo</label>
+            {{ form.tipo }}
+            {{ form.tipo.errors }}
+          </div>
+
+          <!-- Dia da semana (visível só quando tipo = dia_semana) -->
+          <div class="form-group" id="campo-dia-semana">
+            <label for="{{ form.dia_semana.id_for_label }}">Dia da semana</label>
+            {{ form.dia_semana }}
+            {{ form.dia_semana.errors }}
+          </div>
+
+          <!-- Data específica (visível só quando tipo = data) -->
+          <div class="form-group" id="campo-data" style="display:none;">
+            <label for="{{ form.data.id_for_label }}">Data específica</label>
+            {{ form.data }}
+            {{ form.data.errors }}
+          </div>
+
+          <!-- Motivo -->
+          <div class="form-group">
+            <label for="{{ form.motivo.id_for_label }}">Motivo / Descrição</label>
+            {{ form.motivo }}
+            {{ form.motivo.errors }}
+            <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">
+              Ex: Fechado aos domingos, Natal, Feriado municipal…
+            </span>
+          </div>
+
+          <div class="form-acoes" style="margin-top:1rem;">
+            <button type="submit" class="btn-admin btn-admin-primario" style="width:100%;">
+              <i class="fas fa-save"></i> Salvar bloqueio
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toggle dos campos de acordo com o tipo selecionado -->
+<script>
+  const selectTipo = document.getElementById('{{ form.tipo.id_for_label }}');
+  const campoDia   = document.getElementById('campo-dia-semana');
+  const campoData  = document.getElementById('campo-data');
+
+  function alternarCampos() {
+    if (selectTipo.value === 'dia_semana') {
+      campoDia.style.display  = '';
+      campoData.style.display = 'none';
+    } else if (selectTipo.value === 'data') {
+      campoDia.style.display  = 'none';
+      campoData.style.display = '';
+    } else {
+      campoDia.style.display  = '';
+      campoData.style.display = 'none';
+    }
+  }
+
+  selectTipo.addEventListener('change', alternarCampos);
+  alternarCampos();  // estado inicial
+</script>
+
+{% endblock %}

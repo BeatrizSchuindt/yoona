@@ -1,7 +1,7 @@
 {% extends 'base_admin.html' %}
 {% load static %}
 
-{% block title %}Gestão de Terapias | Yoona Head Spa{% endblock %}
+{% block title %}Gestão de Terapias e Serviços | Yoona Head Spa{% endblock %}
 
 {% block sidebar_tipo %}Administrador{% endblock %}
 
@@ -10,6 +10,9 @@
   <span class="sidebar-nav-rotulo">Gestão</span>
   <a href="{% url 'servicos:painel_admin' %}" class="ativo">
     <i class="fas fa-spa"></i> Terapias e Serviços
+  </a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}">
+    <i class="fas fa-calendar-times"></i> Bloqueios de Agenda
   </a>
   <a href="#"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
   <a href="#"><i class="fas fa-ticket-alt"></i> Vouchers</a>
@@ -32,7 +35,7 @@
 {% block content %}
 
 <div class="page-header">
-  <h1>Terapias e Serviços</h1>
+  <h1>Gestão de Terapias e Serviços</h1>
   <a href="{% url 'servicos:nova_terapia' %}" class="btn-admin btn-admin-primario">
     <i class="fas fa-plus"></i> Nova terapia
   </a>
@@ -41,9 +44,21 @@
 <div class="card">
   <div class="card-header">
     <h3>Catálogo cadastrado</h3>
-    <span style="font-size:0.75rem;color:var(--texto-muted);">
-      {{ terapias_admin.paginator.count }} registro{{ terapias_admin.paginator.count|pluralize }}
-    </span>
+
+    <!-- Seletor de registros por página -->
+    <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--texto-muted);">
+      <span>Exibir</span>
+      <div style="display:flex;gap:0.25rem;">
+        {% for opcao in opcoes_pagina %}
+          <a href="?por_pagina={{ opcao }}"
+             style="padding:0.2rem 0.5rem;border-radius:4px;border:1px solid {% if por_pagina == opcao %}var(--gold){% else %}var(--borda-sutil){% endif %};color:{% if por_pagina == opcao %}var(--gold){% else %}var(--texto-muted){% endif %};font-size:0.72rem;transition:all 0.15s;"
+             aria-label="{{ opcao }} registros por página">
+            {{ opcao }}
+          </a>
+        {% endfor %}
+      </div>
+      <span>por página</span>
+    </div>
   </div>
 
   <div class="table-wrapper">
@@ -70,12 +85,14 @@
             </td>
             <td>
               <div class="btn-grupo">
-                <a href="#" class="btn-admin btn-admin-outline btn-admin-sm">
+                <a href="{% url 'servicos:editar_terapia' servico.pk %}" class="btn-admin btn-admin-outline btn-admin-sm">
                   <i class="fas fa-pen"></i> Editar
                 </a>
-                <a href="#" class="btn-admin btn-admin-perigo btn-admin-sm">
+                <button type="button"
+                        class="btn-admin btn-admin-perigo btn-admin-sm"
+                        onclick="abrirModalExclusao('{{ servico.pk }}', '{{ servico.nome|escapejs }}')">
                   <i class="fas fa-trash"></i> Excluir
-                </a>
+                </button>
               </div>
             </td>
           </tr>
@@ -95,29 +112,105 @@
     </table>
   </div>
 
-  {% if terapias_admin.has_other_pages %}
-    <div style="padding:0.75rem 1.5rem;border-top:1px solid var(--borda-sutil);">
+  <!-- Rodapé: contador + paginação -->
+  <div style="padding:0.85rem 1.5rem;border-top:1px solid var(--borda-sutil);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+
+    <!-- Contador por extenso -->
+    <span style="font-size:0.75rem;color:var(--texto-muted);">
+      {% if total_registros > 0 %}
+        Mostrando de {{ indice_inicio }} até {{ indice_fim }}
+        de <strong style="color:var(--texto);">{{ total_registros }}</strong>
+        terapia{{ total_registros|pluralize }} cadastrada{{ total_registros|pluralize }}
+      {% else %}
+        Nenhuma terapia cadastrada.
+      {% endif %}
+    </span>
+
+    <!-- Botões de paginação -->
+    {% if terapias_admin.has_other_pages %}
       <div class="paginacao">
         {% if terapias_admin.has_previous %}
-          <a href="?page={{ terapias_admin.previous_page_number }}">
+          <a href="?por_pagina={{ por_pagina }}&page={{ terapias_admin.previous_page_number }}">
             <i class="fas fa-chevron-left"></i>
           </a>
         {% endif %}
+
         {% for num in terapias_admin.paginator.page_range %}
           {% if terapias_admin.number == num %}
             <span class="pagina-atual">{{ num }}</span>
           {% else %}
-            <a href="?page={{ num }}">{{ num }}</a>
+            <a href="?por_pagina={{ por_pagina }}&page={{ num }}">{{ num }}</a>
           {% endif %}
         {% endfor %}
+
         {% if terapias_admin.has_next %}
-          <a href="?page={{ terapias_admin.next_page_number }}">
+          <a href="?por_pagina={{ por_pagina }}&page={{ terapias_admin.next_page_number }}">
             <i class="fas fa-chevron-right"></i>
           </a>
         {% endif %}
       </div>
-    </div>
-  {% endif %}
+    {% endif %}
+
+  </div>
 </div>
+
+<!-- ===== MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ===== -->
+<div id="modal-exclusao" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;">
+  <!-- Overlay -->
+  <div onclick="fecharModalExclusao()"
+       style="position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(2px);"></div>
+
+  <!-- Caixa do modal -->
+  <div style="position:relative;background:var(--superficie);border:1px solid var(--borda-sutil);border-radius:12px;padding:2rem;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <!-- Ícone de alerta -->
+    <div style="width:52px;height:52px;border-radius:50%;background:rgba(220,53,69,0.12);border:1px solid rgba(220,53,69,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.4rem;color:#f08080;">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+
+    <h3 style="text-align:center;margin-bottom:0.5rem;font-size:1.05rem;">Remover terapia?</h3>
+    <p style="text-align:center;color:var(--texto-muted);font-size:0.85rem;margin-bottom:0.25rem;">
+      Você está prestes a remover:
+    </p>
+    <p id="modal-nome-servico"
+       style="text-align:center;font-weight:600;color:var(--texto);font-size:0.95rem;margin-bottom:1.5rem;"></p>
+    <p style="text-align:center;color:var(--texto-muted);font-size:0.78rem;margin-bottom:1.75rem;">
+      Se houver agendamentos vinculados, a remoção será bloqueada automaticamente.
+    </p>
+
+    <!-- Formulário POST oculto -->
+    <form id="form-exclusao" method="post" action="">
+      {% csrf_token %}
+      <div style="display:flex;gap:0.75rem;justify-content:center;">
+        <button type="button" onclick="fecharModalExclusao()"
+                class="btn-admin btn-admin-outline">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-admin btn-admin-perigo">
+          <i class="fas fa-trash"></i> Sim, remover
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalExclusao(pk, nome) {
+    document.getElementById('modal-nome-servico').textContent = nome;
+    document.getElementById('form-exclusao').action = '/painel/admin/terapias/' + pk + '/remover/';
+    const modal = document.getElementById('modal-exclusao');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function fecharModalExclusao() {
+    document.getElementById('modal-exclusao').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Fechar com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModalExclusao();
+  });
+</script>
 
 {% endblock %}

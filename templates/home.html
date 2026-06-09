@@ -11,7 +11,7 @@
   <h1>Cuide da sua mente.<br><span class="destaque">Renove seu couro cabeludo.</span></h1>
   <p class="hero-sub">Um espaço exclusivo dedicado ao relaxamento profundo, à saúde capilar e ao bem-estar que você merece.</p>
   <div class="hero-acoes">
-    <a href="#agendamento" class="btn btn-dourado btn-lg">
+    <a href="{% url 'clientes:identificacao' %}" class="btn btn-dourado btn-lg">
       <i class="fas fa-calendar-alt"></i> Agendar agora
     </a>
     <a href="#catalogo" class="btn btn-outline-dourado btn-lg">
@@ -67,7 +67,7 @@
               <span><i class="fas fa-clock" style="color:var(--gold); margin-right:4px;"></i>{{ terapia.duracao }} min</span>
               <span class="preco">R$ {{ terapia.preco_base }}</span>
             </div>
-            <a href="#agendamento" class="btn btn-outline-dourado btn-sm">Agendar</a>
+            <a href="{% url 'clientes:identificacao' %}" class="btn btn-outline-dourado btn-sm">Agendar</a>
           </div>
         </div>
       </article>
@@ -93,7 +93,7 @@
          class="sobre-img"
          loading="lazy" />
     <p>Basta informar seu <strong>CPF</strong>, escolher a terapia e o melhor horário disponível. Após confirmado, você preencherá uma rápida <strong>Ficha de Anamnese</strong> para personalizarmos seu atendimento.</p>
-    <a href="{% url 'servicos:home' %}#agendamento" class="btn btn-dourado btn-lg" style="margin-top:1rem;">
+    <a href="{% url 'clientes:identificacao' %}" class="btn btn-dourado btn-lg" style="margin-top:1rem;">
       <i class="fas fa-calendar-alt"></i> Iniciar agendamento
     </a>
   </div>
