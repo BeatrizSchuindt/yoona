@@ -114,6 +114,7 @@ class AnamneseView(View):
         return render(request, self.template_name, {
             'form': form,
             'cliente': cliente,
+            'primeiro_nome': cliente.nome_completo.split()[0],
             'anamnese_existente': anamnese is not None,
         })
 
@@ -142,5 +143,6 @@ class AnamneseView(View):
         return render(request, self.template_name, {
             'form': form,
             'cliente': cliente,
+            'primeiro_nome': cliente.nome_completo.split()[0],
             'anamnese_existente': anamnese is not None,
         })

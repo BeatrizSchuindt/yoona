@@ -18,9 +18,9 @@
                color:#0C3528;margin-bottom:0.3rem;">Ficha de Saúde Capilar (Anamnese)</h1>
     <p style="color:#6b7280;font-size:0.875rem;max-width:480px;margin:0 auto;">
       {% if anamnese_existente %}
-        Suas informações estão pré-preenchidas. Atualize o que mudou e salve novamente.
+        <strong>{{ primeiro_nome }}</strong>, suas informações estão pré-preenchidas. Atualize o que mudou e salve novamente.
       {% else %}
-        Preencha sua ficha para personalizarmos seu atendimento.
+        <strong>{{ primeiro_nome }}</strong>, preencha sua ficha para personalizarmos seu atendimento.
       {% endif %}
     </p>
   </div>
