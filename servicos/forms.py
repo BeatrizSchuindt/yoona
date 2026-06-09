@@ -37,9 +37,38 @@ class ServicoForm(forms.ModelForm):
             }, choices=[(True, 'Ativo'), (False, 'Inativo')]),
         }
 
-    # TOdo: verificar validações depois
+        error_messages = {
+            'nome': {
+                'required':   'O nome da terapia é obrigatório.',
+                'max_length': 'O nome não pode ultrapassar 100 caracteres.',
+            },
+            'descricao': {
+                'required': 'A descrição da terapia é obrigatória.',
+            },
+            'duracao': {
+                'required': 'A duração é obrigatória.',
+                'invalid':  'Informe um número inteiro de minutos (ex: 60).',
+            },
+            'preco_base': {
+                'required': 'O preço base é obrigatório.',
+                'invalid':  'Informe um valor monetário válido (ex: 120.00).',
+            },
+            'imagem': {
+                'invalid_image': (
+                    'Envie uma imagem válida. '
+                    'O arquivo enviado não é uma imagem ou está corrompido.'
+                ),
+            },
+        }
+
+    def clean_duracao(self):
+        duracao = self.cleaned_data.get('duracao')
+        if duracao is not None and duracao <= 0:
+            raise forms.ValidationError('A duração deve ser maior que zero.')
+        return duracao
+
     def clean_preco_base(self):
         preco = self.cleaned_data.get('preco_base')
-        if preco and preco < 0:
-            raise forms.ValidationError("O preço base não pode ser um valor negativo.")
+        if preco is not None and preco < 0:
+            raise forms.ValidationError('O preço base não pode ser um valor negativo.')
         return preco
