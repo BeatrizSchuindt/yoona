@@ -1,6 +1,7 @@
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Cliente, Anamnese
 from .forms import CPFForm, NovoCadastroForm, AnamneseForm
 
@@ -145,4 +146,21 @@ class AnamneseView(View):
             'cliente': cliente,
             'primeiro_nome': cliente.nome_completo.split()[0],
             'anamnese_existente': anamnese is not None,
+        })
+
+
+class AnamneseDetailView(LoginRequiredMixin, View):
+    """
+    US11 / US07 — Visualização da ficha de anamnese pelo painel interno.
+    Acesso restrito a usuários logados (administrador ou terapeuta).
+    """
+    template_name = 'anamnese_detalhe.html'
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        cliente = get_object_or_404(Cliente, pk=pk)
+        anamnese = getattr(cliente, 'anamnese', None)
+        return render(request, self.template_name, {
+            'cliente': cliente,
+            'anamnese': anamnese,
         })

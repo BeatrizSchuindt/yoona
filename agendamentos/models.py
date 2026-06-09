@@ -88,11 +88,14 @@ class Agendamento(models.Model):
     Registro central de um atendimento — desde a solicitação até a conclusão
     """
     STATUS_CHOICES = [
-        ('aguardando',  'Aguardando'),
-        ('confirmado',  'Confirmado'),
-        ('concluido',   'Concluído'),
-        ('cancelado',   'Cancelado'),
+        ('aguardando',   'Aguardando'),
+        ('em_andamento', 'Em Andamento'),
+        ('confirmado',   'Confirmado'),
+        ('concluido',    'Concluído'),
+        ('cancelado',    'Cancelado'),
     ]
+    # Status que ocupam um horário na agenda (impedem novo agendamento no mesmo slot)
+    STATUS_ATIVOS = ['aguardando', 'em_andamento', 'confirmado']
     PAGAMENTO_CHOICES = [
         ('pix',      'PIX'),
         ('credito',  'Cartão de Crédito'),

@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, time, datetime, timedelta
 
 from django.views import View
@@ -7,11 +8,13 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Q
+from django.urls import reverse
 
 from servicos.views import AdminStaffRequiredMixin
 from servicos.models import Servico
 from clientes.models import Cliente
-from .models import Agendamento, BloqueioAgenda
+from terapeutas.models import Terapeuta
+from .models import Agendamento, BloqueioAgenda, Comissao
 from .forms import SolicitacaoAgendamentoForm, BloqueioAgendaForm
 
 
@@ -68,7 +71,7 @@ def _slots_disponiveis(data_escolhida):
     ocupados = set(
         Agendamento.objects.filter(
             data_agendamento=data_escolhida,
-            status__in=['aguardando', 'confirmado'],
+            status__in=Agendamento.STATUS_ATIVOS,
         ).values_list('horario_agendamento', flat=True)
     )
 
@@ -156,7 +159,7 @@ class SolicitacaoView(View):
             conflito = Agendamento.objects.select_for_update().filter(
                 data_agendamento=dados['data_agendamento'],
                 horario_agendamento=dados['horario_agendamento'],
-                status__in=['aguardando', 'confirmado'],
+                status__in=Agendamento.STATUS_ATIVOS,
             ).exists()
 
             if conflito:
@@ -251,3 +254,110 @@ class RemoverBloqueioView(AdminStaffRequiredMixin, View):
         bloqueio.delete()
         messages.success(request, 'Bloqueio removido com sucesso.')
         return redirect('agendamentos:gerenciar_bloqueios')
+
+
+# ---------------------------------------------------------------------------
+# US11 — Gestão Diária de Agendamentos
+# ---------------------------------------------------------------------------
+
+class GestaoAgendaView(AdminStaffRequiredMixin, View):
+    """
+    Listagem dos agendamentos do dia (filtrável por data) para o administrador.
+    Permite vincular terapeuta e alterar o status de cada atendimento.
+    """
+    template_name = 'gestao_agenda.html'
+
+    def get(self, request):
+        data_str = request.GET.get('data', date.today().isoformat())
+        try:
+            data_filtro = date.fromisoformat(data_str)
+        except ValueError:
+            data_filtro = date.today()
+
+        agendamentos = (
+            Agendamento.objects
+            .filter(data_agendamento=data_filtro)
+            .select_related('cliente', 'servico', 'terapeuta')
+            .order_by('horario_agendamento')
+        )
+
+        return render(request, self.template_name, {
+            'agendamentos': agendamentos,
+            'data_filtro': data_filtro.isoformat(),
+            'terapeutas': Terapeuta.objects.filter(ativo=True).order_by('nome_terapeuta'),
+            'status_choices': Agendamento.STATUS_CHOICES,
+        })
+
+
+class AtualizarAgendamentoView(AdminStaffRequiredMixin, View):
+    """
+    Salva o vínculo de terapeuta e a transição de status de um agendamento.
+    Regras (US11):
+      · Concluído exige terapeuta vinculado.
+      · Concluir gera a comissão automaticamente (imutável).
+      · Agendamento já concluído não pode ser alterado.
+    """
+
+    def post(self, request, pk):
+        agendamento = get_object_or_404(Agendamento, pk=pk)
+
+        # Mantém o filtro de data ao redirecionar de volta à lista
+        base_url = reverse('agendamentos:gestao_agenda')
+        data_q = request.POST.get('data_filtro', '')
+        destino = f"{base_url}?data={data_q}" if data_q else base_url
+
+        # Imutabilidade: concluído não pode mais ser alterado
+        if agendamento.status == 'concluido':
+            messages.error(
+                request,
+                'Este agendamento já foi concluído e não pode ser alterado.'
+            )
+            return redirect(destino)
+
+        novo_status = request.POST.get('status', agendamento.status)
+        terapeuta_id = request.POST.get('terapeuta') or None
+
+        # Resolve o terapeuta selecionado
+        terapeuta = None
+        if terapeuta_id:
+            terapeuta = get_object_or_404(Terapeuta, pk=terapeuta_id)
+
+        # ── Conclusão exige terapeuta + gera comissão ─────────────────────
+        if novo_status == 'concluido':
+            if not terapeuta:
+                messages.error(
+                    request,
+                    'Não é possível concluir: Terapeuta não vinculado.'
+                )
+                return redirect(destino)
+
+            with transaction.atomic():
+                agendamento.terapeuta = terapeuta
+                agendamento.status = 'concluido'
+                if agendamento.valor_final is None:
+                    agendamento.valor_final = agendamento.calcular_valor_final()
+                agendamento.save()
+
+                # Gera a comissão apenas se ainda não existir
+                if not hasattr(agendamento, 'comissao'):
+                    valor_comissao = (
+                        agendamento.valor_final * terapeuta.percentual_decimal
+                    ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                    Comissao.objects.create(
+                        agendamento=agendamento,
+                        terapeuta=terapeuta,
+                        valor_calculado=valor_comissao,
+                    )
+
+            messages.success(
+                request,
+                'Atendimento concluído e comissão registrada com sucesso.'
+            )
+            return redirect(destino)
+
+        # ── Demais status (aguardando / em_andamento / confirmado / cancelado) ──
+        agendamento.terapeuta = terapeuta
+        agendamento.status = novo_status
+        agendamento.save()
+        messages.success(request, 'Agendamento atualizado com sucesso.')
+        return redirect(destino)

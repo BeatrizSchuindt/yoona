@@ -81,7 +81,7 @@ class SolicitacaoAgendamentoForm(forms.Form):
             conflito = Agendamento.objects.filter(
                 data_agendamento=data,
                 horario_agendamento=horario,
-                status__in=['aguardando', 'confirmado'],
+                status__in=Agendamento.STATUS_ATIVOS,
             ).exists()
             if conflito:
                 raise forms.ValidationError(

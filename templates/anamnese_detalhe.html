@@ -1,0 +1,145 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Ficha de Anamnese | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}{% if user.is_staff %}Administrador{% else %}Terapeuta{% endif %}{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <a href="{% url 'agendamentos:gestao_agenda' %}">
+    <i class="fas fa-arrow-left"></i> Voltar à agenda
+  </a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'agendamentos:gestao_agenda' %}">Gestão de Agenda</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Ficha de Anamnese</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Ficha de Anamnese</h1>
+</div>
+
+<!-- Dados do cliente -->
+<div class="card" style="margin-bottom:1rem;">
+  <div class="card-body" style="display:flex;align-items:center;gap:1rem;">
+    <div style="width:48px;height:48px;border-radius:50%;background:rgba(201,168,76,0.12);
+                border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;
+                justify-content:center;color:var(--gold);font-size:1.2rem;flex-shrink:0;">
+      <i class="fas fa-user"></i>
+    </div>
+    <div>
+      <div style="font-weight:600;font-size:1rem;color:var(--texto);">{{ cliente.nome_completo }}</div>
+      <div style="font-size:0.8rem;color:var(--texto-muted);">
+        CPF: {{ cliente.cpf }} &nbsp;·&nbsp; {{ cliente.telefone }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if anamnese %}
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-notes-medical" style="color:var(--gold);margin-right:0.5rem;"></i>Saúde capilar</h3>
+      <span style="font-size:0.72rem;color:var(--texto-muted);">
+        Atualizada em {{ anamnese.data_atualizacao|date:"d/m/Y H:i" }}
+      </span>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;gap:1.25rem;">
+
+        <!-- Alergias -->
+        <div class="an-det-item">
+          <div class="an-det-label">Alergias</div>
+          {% if anamnese.tem_alergias %}
+            <div class="an-det-sim"><i class="fas fa-exclamation-circle"></i> Sim</div>
+            <p class="an-det-texto">{{ anamnese.alergias_detalhes }}</p>
+          {% else %}
+            <div class="an-det-nao">Não relatadas</div>
+          {% endif %}
+        </div>
+
+        <!-- Sensibilidade -->
+        <div class="an-det-item">
+          <div class="an-det-label">Sensibilidade no couro cabeludo</div>
+          {% if anamnese.tem_sensibilidade %}
+            <div class="an-det-sim"><i class="fas fa-exclamation-circle"></i> Sim</div>
+            <p class="an-det-texto">{{ anamnese.sensibilidade_detalhes }}</p>
+          {% else %}
+            <div class="an-det-nao">Não relatada</div>
+          {% endif %}
+        </div>
+
+        <!-- Procedimentos -->
+        <div class="an-det-item">
+          <div class="an-det-label">Procedimentos químicos recentes</div>
+          {% if anamnese.procedimentos_anteriores %}
+            <p class="an-det-texto">{{ anamnese.procedimentos_anteriores }}</p>
+          {% else %}
+            <div class="an-det-nao">Nenhum informado</div>
+          {% endif %}
+        </div>
+
+        <!-- Medicamentos -->
+        <div class="an-det-item">
+          <div class="an-det-label">Medicamentos de uso contínuo</div>
+          {% if anamnese.usa_medicamentos %}
+            <div class="an-det-sim"><i class="fas fa-exclamation-circle"></i> Sim</div>
+            <p class="an-det-texto">{{ anamnese.medicamentos_detalhes }}</p>
+          {% else %}
+            <div class="an-det-nao">Não utiliza</div>
+          {% endif %}
+        </div>
+
+        <!-- Preferências -->
+        <div class="an-det-item">
+          <div class="an-det-label">Preferências e observações</div>
+          {% if anamnese.preferencias %}
+            <p class="an-det-texto">{{ anamnese.preferencias }}</p>
+          {% else %}
+            <div class="an-det-nao">Nenhuma informada</div>
+          {% endif %}
+        </div>
+
+        <!-- LGPD -->
+        <div class="an-det-item">
+          <div class="an-det-label">Consentimento LGPD</div>
+          {% if anamnese.consentimento_lgpd %}
+            <div class="an-det-sim" style="color:#15803d;"><i class="fas fa-check-circle"></i> Consentido</div>
+          {% else %}
+            <div class="an-det-nao">Não consentido</div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding:2.5rem;color:var(--texto-muted);">
+      <i class="fas fa-folder-open" style="display:block;font-size:2rem;margin-bottom:0.75rem;color:var(--borda);"></i>
+      Este cliente ainda não preencheu a ficha de anamnese.
+    </div>
+  </div>
+{% endif %}
+
+<style>
+  .an-det-item { border-bottom:1px solid var(--borda-sutil); padding-bottom:1rem; }
+  .an-det-item:last-child { border-bottom:none; padding-bottom:0; }
+  .an-det-label {
+    font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--texto-muted); font-weight:600; margin-bottom:0.4rem;
+  }
+  .an-det-sim { font-size:0.85rem; font-weight:600; color:#b45309; }
+  .an-det-nao { font-size:0.85rem; color:var(--texto-muted); }
+  .an-det-texto {
+    font-size:0.88rem; color:var(--texto); margin-top:0.3rem;
+    line-height:1.5; white-space:pre-line;
+  }
+</style>
+
+{% endblock %}
