@@ -186,8 +186,7 @@ class SolicitacaoView(View):
             request,
             'Horário reservado! Por favor, preencha sua ficha de saúde para concluirmos.'
         )
-        # Redireciona para anamnese (US06) — temporariamente para home
-        return redirect('servicos:home')
+        return redirect('clientes:anamnese')
 
 
 # ---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ class ClienteAdmin(admin.ModelAdmin):
 
 @admin.register(Anamnese)
 class AnamneseAdmin(admin.ModelAdmin):
-    list_display = ('cliente', 'sensibilidades', 'consentimento_lgpd', 'data_preenchimento')
-    list_filter = ('sensibilidades', 'consentimento_lgpd')
+    list_display = ('cliente', 'tem_alergias', 'tem_sensibilidade', 'usa_medicamentos', 'consentimento_lgpd', 'data_preenchimento')
+    list_filter = ('tem_alergias', 'tem_sensibilidade', 'usa_medicamentos', 'consentimento_lgpd')
     search_fields = ('cliente__nome_completo', 'cliente__cpf')
     readonly_fields = ('data_preenchimento', 'data_atualizacao')

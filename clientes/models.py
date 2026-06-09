@@ -32,15 +32,9 @@ class Cliente(models.Model):
 
 class Anamnese(models.Model):
     """
-    Ficha de saúde capilar/anamnese vinculada a um cliente
-    Preenchida uma vez após o primeiro agendamento e pode ser atualizada.
+    Ficha de saúde capilar vinculada 1:1 ao cliente.
+    Preenchida após o primeiro agendamento; pode ser atualizada em visitas posteriores.
     """
-    SENSIBILIDADE_CHOICES = [
-        ('normal',     'Normal (sem incômodos frequentes)'),
-        ('sensivel',   'Sensível (fica irritado com facilidade)'),
-        ('dermatite',  'Dermatite, descamação ou caspa ativa'),
-        ('dor',        'Sinto dor ao toque ou ao prender o cabelo'),
-    ]
 
     cliente = models.OneToOneField(
         Cliente,
@@ -48,34 +42,61 @@ class Anamnese(models.Model):
         related_name='anamnese',
         verbose_name='Cliente',
     )
-    alergias = models.TextField(
+
+    # ── Alergias ──────────────────────────────────────────────────────────
+    tem_alergias = models.BooleanField(
+        default=False,
+        verbose_name='Possui alergias?',
+    )
+    alergias_detalhes = models.TextField(
         blank=True,
-        verbose_name='Alergias conhecidas',
-        help_text='Cosméticos, óleos essenciais, látex etc. Deixe em branco se não houver.',
+        verbose_name='Quais alergias?',
+        help_text='Cosméticos, óleos essenciais, látex etc.',
     )
-    sensibilidades = models.CharField(
-        max_length=20,
-        choices=SENSIBILIDADE_CHOICES,
-        default='normal',
-        verbose_name='Sensibilidade do couro cabeludo',
+
+    # ── Sensibilidade no couro cabeludo ───────────────────────────────────
+    tem_sensibilidade = models.BooleanField(
+        default=False,
+        verbose_name='Possui sensibilidade no couro cabeludo?',
     )
+    sensibilidade_detalhes = models.TextField(
+        blank=True,
+        verbose_name='Detalhes da sensibilidade',
+        help_text='Descreva quando/como ocorre.',
+    )
+
+    # ── Procedimentos químicos recentes ───────────────────────────────────
     procedimentos_anteriores = models.TextField(
         blank=True,
-        verbose_name='Procedimentos químicos anteriores',
+        verbose_name='Procedimentos químicos recentes',
         help_text='Alisamentos, descolorações, tinturas — e há quanto tempo.',
     )
+
+    # ── Medicamentos contínuos ────────────────────────────────────────────
+    usa_medicamentos = models.BooleanField(
+        default=False,
+        verbose_name='Usa medicamentos de uso contínuo?',
+    )
+    medicamentos_detalhes = models.TextField(
+        blank=True,
+        verbose_name='Quais medicamentos?',
+    )
+
+    # ── Preferências ──────────────────────────────────────────────────────
     preferencias = models.TextField(
         blank=True,
-        verbose_name='Preferências de atendimento',
+        verbose_name='Preferências e observações adicionais',
         help_text='Pressão da massagem, aromas preferidos, silêncio etc.',
     )
+
+    # ── LGPD ──────────────────────────────────────────────────────────────
     consentimento_lgpd = models.BooleanField(
         default=False,
         verbose_name='Consentimento LGPD',
-        help_text='Cliente autorizou o armazenamento dos dados de saúde capilar.',
     )
+
     data_preenchimento = models.DateTimeField(auto_now_add=True, verbose_name='Preenchido em')
-    data_atualizacao = models.DateTimeField(auto_now=True, verbose_name='Atualizado em')
+    data_atualizacao   = models.DateTimeField(auto_now=True,     verbose_name='Atualizado em')
 
     class Meta:
         verbose_name = 'Anamnese'

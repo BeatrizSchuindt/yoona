@@ -1,84 +1,262 @@
 {% extends 'base_cliente.html' %}
 {% load static %}
 
-{% block title %}Ficha de Anamnese | Yoona Head Spa{% endblock %}
-{% block meta_desc %}Preencha sua ficha de anamnese para personalizarmos seu atendimento no Yoona Head Spa.{% endblock %}
+{% block title %}Ficha de Saúde Capilar | Yoona Head Spa{% endblock %}
 
 {% block content %}
+<section style="padding:3rem 1rem 4rem;max-width:680px;margin:0 auto;">
 
-<div class="form-wrapper">
-  <div class="form-card">
+  <!-- Cabeçalho -->
+  <div style="text-align:center;margin-bottom:2rem;">
+    <span style="display:inline-flex;align-items:center;justify-content:center;
+                 width:56px;height:56px;border-radius:50%;
+                 background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);
+                 font-size:1.4rem;color:#C9A84C;margin-bottom:1rem;">
+      <i class="fas fa-notes-medical"></i>
+    </span>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:600;
+               color:#0C3528;margin-bottom:0.3rem;">Ficha de Saúde Capilar (Anamnese)</h1>
+    <p style="color:#6b7280;font-size:0.875rem;max-width:480px;margin:0 auto;">
+      {% if anamnese_existente %}
+        Suas informações estão pré-preenchidas. Atualize o que mudou e salve novamente.
+      {% else %}
+        Preencha sua ficha para personalizarmos seu atendimento.
+      {% endif %}
+    </p>
+  </div>
 
-    <div class="form-card-header">
-      <div class="form-card-icone" style="background:rgba(76,175,80,0.1);border-color:rgba(76,175,80,0.3);color:#a5d6a7;">
-        <i class="fas fa-notes-medical"></i>
-      </div>
-      <h1>Ficha de Anamnese</h1>
-      <p>Agendamento confirmado! Só precisamos de algumas informações sobre sua saúde capilar.</p>
-    </div>
+  <form method="post" novalidate id="form-anamnese">
+    {% csrf_token %}
 
-    <form method="post" action="#" novalidate>
-      {% csrf_token %}
-
-      <!-- ALERGIAS -->
-      <div class="form-group">
-        <label for="alergias">Alergias conhecidas</label>
-        <span class="ajuda">Você possui alergia a algum cosmético, óleo essencial, látex ou alimento?</span>
-        <textarea name="alergias"
-                  id="alergias"
-                  rows="2"
-                  placeholder="Ex: Alergia a óleo de amêndoas. (Deixe em branco se não houver.)"></textarea>
-      </div>
-
-      <!-- SENSIBILIDADES -->
-      <div class="form-group">
-        <label for="sensibilidades">Sensibilidade do couro cabeludo *</label>
-        <span class="ajuda">Como você avalia a sensibilidade da sua pele/couro cabeludo?</span>
-        <select name="sensibilidades" id="sensibilidades" required>
-          <option value="">Selecione uma opção...</option>
-          <option value="Normal">Normal (sem incômodos frequentes)</option>
-          <option value="Sensivel">Sensível (fica vermelho ou irritado com facilidade)</option>
-          <option value="Dermatite">Possuo dermatite, descamação ou caspa ativa</option>
-          <option value="Dor">Sinto dor no couro cabeludo ao toque ou ao prender o cabelo</option>
-        </select>
+    <!-- ── 1. Alergias ────────────────────────────────────────────────── -->
+    <div class="an-card">
+      <div class="an-card-titulo">
+        <i class="fas fa-allergies" style="color:#C9A84C;"></i>
+        Alergias conhecidas
       </div>
 
-      <!-- PROCEDIMENTOS ANTERIORES -->
-      <div class="form-group">
-        <label for="procedimentos_anteriores">Procedimentos químicos anteriores</label>
-        <span class="ajuda">Realizou alisamentos, descolorações ou tinturas recentemente? Há quanto tempo?</span>
-        <textarea name="procedimentos_anteriores"
-                  id="procedimentos_anteriores"
-                  rows="2"
-                  placeholder="Ex: Fiz luzes há 2 meses e progressiva há 6 meses."></textarea>
-      </div>
-
-      <!-- PREFERÊNCIAS -->
-      <div class="form-group">
-        <label for="preferencias">Preferências de atendimento</label>
-        <span class="ajuda">Como podemos tornar sua experiência perfeita?</span>
-        <textarea name="preferencias"
-                  id="preferencias"
-                  rows="2"
-                  placeholder="Ex: Prefiro pressão mais forte. Gosto de aromas de lavanda."></textarea>
-      </div>
-
-      <!-- LGPD -->
-      <div class="lgpd-box">
-        <input type="checkbox" id="consentimento_lgpd" name="consentimento_lgpd" required />
-        <label for="consentimento_lgpd">
-          <strong style="color:var(--texto);">Consentimento de Dados (LGPD):</strong>
-          Autorizo o Yoona Head Spa a armazenar minhas respostas estritamente para a finalidade de personalizar e garantir a segurança do meu atendimento. Estou ciente de que esses dados são sigilosos e não serão compartilhados.
+      <div class="an-radio-grupo">
+        <label class="an-radio-label">
+          <input type="radio" name="tem_alergias" value="True"
+                 {% if form.tem_alergias.value == 'True' or form.tem_alergias.value == True %}checked{% endif %}
+                 onchange="toggleCampo('det-alergias', true)">
+          Sim
+        </label>
+        <label class="an-radio-label">
+          <input type="radio" name="tem_alergias" value="False"
+                 {% if not form.tem_alergias.value or form.tem_alergias.value == 'False' or form.tem_alergias.value == False %}checked{% endif %}
+                 onchange="toggleCampo('det-alergias', false)">
+          Não
         </label>
       </div>
+      {% if form.tem_alergias.errors %}
+        <p class="an-erro">{{ form.tem_alergias.errors|join:" " }}</p>
+      {% endif %}
 
-      <button type="submit" class="btn btn-dourado btn-full btn-lg">
-        <i class="fas fa-check-circle"></i> Concluir Agendamento
-      </button>
+      <div id="det-alergias" class="an-condicional" style="display:none;">
+        <label class="an-label">Quais? <span class="an-obrig">*</span></label>
+        {{ form.alergias_detalhes }}
+        {% if form.alergias_detalhes.errors %}
+          <p class="an-erro">{{ form.alergias_detalhes.errors|join:" " }}</p>
+        {% endif %}
+      </div>
+    </div>
 
-    </form>
+    <!-- ── 2. Sensibilidade ───────────────────────────────────────────── -->
+    <div class="an-card">
+      <div class="an-card-titulo">
+        <i class="fas fa-hand-sparkles" style="color:#C9A84C;"></i>
+        Sensibilidade no couro cabeludo
+      </div>
 
+      <div class="an-radio-grupo">
+        <label class="an-radio-label">
+          <input type="radio" name="tem_sensibilidade" value="True"
+                 {% if form.tem_sensibilidade.value == 'True' or form.tem_sensibilidade.value == True %}checked{% endif %}
+                 onchange="toggleCampo('det-sensibilidade', true)">
+          Sim
+        </label>
+        <label class="an-radio-label">
+          <input type="radio" name="tem_sensibilidade" value="False"
+                 {% if not form.tem_sensibilidade.value or form.tem_sensibilidade.value == 'False' or form.tem_sensibilidade.value == False %}checked{% endif %}
+                 onchange="toggleCampo('det-sensibilidade', false)">
+          Não
+        </label>
+      </div>
+      {% if form.tem_sensibilidade.errors %}
+        <p class="an-erro">{{ form.tem_sensibilidade.errors|join:" " }}</p>
+      {% endif %}
+
+      <div id="det-sensibilidade" class="an-condicional" style="display:none;">
+        <label class="an-label">Descreva a sensibilidade <span class="an-obrig">*</span></label>
+        {{ form.sensibilidade_detalhes }}
+        {% if form.sensibilidade_detalhes.errors %}
+          <p class="an-erro">{{ form.sensibilidade_detalhes.errors|join:" " }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── 3. Procedimentos químicos ──────────────────────────────────── -->
+    <div class="an-card">
+      <div class="an-card-titulo">
+        <i class="fas fa-flask" style="color:#C9A84C;"></i>
+        Procedimentos químicos recentes
+      </div>
+      <label class="an-label" style="margin-bottom:0.4rem;display:block;">
+        Liste procedimentos dos últimos 6 meses <span style="color:#9ca3af;font-weight:400;">(opcional)</span>
+      </label>
+      {{ form.procedimentos_anteriores }}
+    </div>
+
+    <!-- ── 4. Medicamentos ────────────────────────────────────────────── -->
+    <div class="an-card">
+      <div class="an-card-titulo">
+        <i class="fas fa-pills" style="color:#C9A84C;"></i>
+        Medicamentos de uso contínuo
+      </div>
+
+      <div class="an-radio-grupo">
+        <label class="an-radio-label">
+          <input type="radio" name="usa_medicamentos" value="True"
+                 {% if form.usa_medicamentos.value == 'True' or form.usa_medicamentos.value == True %}checked{% endif %}
+                 onchange="toggleCampo('det-medicamentos', true)">
+          Sim
+        </label>
+        <label class="an-radio-label">
+          <input type="radio" name="usa_medicamentos" value="False"
+                 {% if not form.usa_medicamentos.value or form.usa_medicamentos.value == 'False' or form.usa_medicamentos.value == False %}checked{% endif %}
+                 onchange="toggleCampo('det-medicamentos', false)">
+          Não
+        </label>
+      </div>
+      {% if form.usa_medicamentos.errors %}
+        <p class="an-erro">{{ form.usa_medicamentos.errors|join:" " }}</p>
+      {% endif %}
+
+      <div id="det-medicamentos" class="an-condicional" style="display:none;">
+        <label class="an-label">Quais medicamentos? <span class="an-obrig">*</span></label>
+        {{ form.medicamentos_detalhes }}
+        {% if form.medicamentos_detalhes.errors %}
+          <p class="an-erro">{{ form.medicamentos_detalhes.errors|join:" " }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── 5. Preferências ────────────────────────────────────────────── -->
+    <div class="an-card">
+      <div class="an-card-titulo">
+        <i class="fas fa-heart" style="color:#C9A84C;"></i>
+        Preferências e observações adicionais
+      </div>
+      <label class="an-label" style="margin-bottom:0.4rem;display:block;">
+        <span style="color:#9ca3af;font-weight:400;">Opcional</span>
+      </label>
+      {{ form.preferencias }}
+    </div>
+
+    <!-- ── 6. LGPD ────────────────────────────────────────────────────── -->
+    <div class="an-card {% if form.consentimento_lgpd.errors %}an-card-erro{% endif %}">
+      <label class="an-checkbox-label">
+        <input type="checkbox" name="consentimento_lgpd" id="id_consentimento_lgpd"
+               {% if form.consentimento_lgpd.value %}checked{% endif %}
+               style="width:18px;height:18px;accent-color:#0C3528;flex-shrink:0;margin-top:2px;">
+        <span style="font-size:0.82rem;color:#374151;line-height:1.5;">
+          Declaro que as informações acima são verdadeiras e consinto com o armazenamento
+          dos meus dados de saúde pelo <strong>Yoona Head Spa</strong> exclusivamente para
+          fins de personalização e segurança do meu atendimento, conforme a
+          <strong>LGPD</strong> (Lei nº 13.709/2018).
+        </span>
+      </label>
+      {% if form.consentimento_lgpd.errors %}
+        <p class="an-erro" style="margin-top:0.6rem;">
+          <i class="fas fa-exclamation-circle" style="margin-right:0.3rem;"></i>
+          {{ form.consentimento_lgpd.errors|join:" " }}
+        </p>
+      {% endif %}
+    </div>
+
+    <button type="submit"
+            style="width:100%;padding:0.9rem;border:none;border-radius:10px;
+                   background:#0C3528;color:#C9A84C;font-size:1rem;font-weight:600;
+                   cursor:pointer;display:flex;align-items:center;justify-content:center;
+                   gap:0.6rem;margin-top:0.5rem;transition:opacity 0.2s;">
+      <i class="fas fa-save"></i> Salvar Ficha de Anamnese
+    </button>
+
+  </form>
+
+  <div style="text-align:center;margin-top:1.25rem;">
+    <a href="{% url 'servicos:home' %}"
+       style="font-size:0.8rem;color:#6b7280;text-decoration:none;">
+      <i class="fas fa-arrow-left" style="margin-right:0.3rem;"></i> Pular por agora e ir ao início
+    </a>
   </div>
-</div>
+
+</section>
+
+<!-- ===== ESTILOS ===== -->
+<style>
+  .an-card {
+    background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+    padding:1.25rem 1.5rem;margin-bottom:1rem;
+  }
+  .an-card-erro { border-color:#fca5a5 !important;background:#fff5f5; }
+  .an-card-titulo {
+    font-weight:600;color:#0C3528;font-size:0.9rem;
+    display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;
+  }
+  .an-label { font-size:0.85rem;font-weight:600;color:#374151; }
+  .an-obrig { color:#dc2626; }
+  .an-radio-grupo { display:flex;gap:1rem;flex-wrap:wrap; }
+  .an-radio-label {
+    display:flex;align-items:center;gap:0.5rem;
+    padding:0.5rem 1.1rem;border:1px solid #d1d5db;border-radius:8px;
+    cursor:pointer;font-size:0.875rem;color:#374151;
+    transition:all 0.15s;user-select:none;
+  }
+  .an-radio-label:has(input:checked) {
+    border-color:#0C3528;background:#f0fdf4;color:#0C3528;font-weight:600;
+  }
+  .an-radio-label input[type="radio"] { accent-color:#0C3528;cursor:pointer; }
+  .an-condicional { margin-top:0.85rem; }
+  .an-card textarea,
+  .an-condicional textarea {
+    width:100%;padding:0.7rem 0.9rem;border:1px solid #d1d5db;border-radius:8px;
+    font-size:0.875rem;color:#111827;background:#f9fafb;box-sizing:border-box;
+    outline:none;resize:vertical;font-family:inherit;
+    transition:border-color 0.2s,box-shadow 0.2s;
+  }
+  .an-card textarea:focus,
+  .an-condicional textarea:focus {
+    border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,0.15);background:#fff;
+  }
+  .an-checkbox-label { display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer; }
+  .an-erro { color:#dc2626;font-size:0.78rem;margin-top:0.35rem; }
+  button[type="submit"]:hover { opacity:0.88; }
+</style>
+
+<!-- ===== JS — show/hide campos condicionais ===== -->
+<script>
+  function toggleCampo(id, mostrar) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = mostrar ? 'block' : 'none';
+    if (!mostrar) {
+      const ta = el.querySelector('textarea');
+      if (ta) ta.value = '';
+    }
+  }
+
+  // Inicializa ao carregar (pós-erro de validação ou edição com dados existentes)
+  (function () {
+    function init(radioName, detId) {
+      const checked = document.querySelector(`input[name="${radioName}"]:checked`);
+      if (checked) toggleCampo(detId, checked.value === 'True');
+    }
+    init('tem_alergias',      'det-alergias');
+    init('tem_sensibilidade', 'det-sensibilidade');
+    init('usa_medicamentos',  'det-medicamentos');
+  })();
+</script>
 
 {% endblock %}
