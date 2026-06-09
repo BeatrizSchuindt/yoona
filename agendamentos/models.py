@@ -183,6 +183,41 @@ class Agendamento(models.Model):
         return max(valor, 0)
 
 
+class BloqueioAgenda(models.Model):
+    """
+    Datas ou dias da semana em que o spa não atende.
+    O admin configura via painel — o calendário de agendamento respeita esses bloqueios.
+    """
+    TIPO_CHOICES = [
+        ('dia_semana', 'Dia da semana (recorrente)'),
+        ('data',       'Data específica'),
+    ]
+    # Segue a convenção do Python: weekday() → 0=Segunda … 6=Domingo
+    DIAS_SEMANA = [
+        (0, 'Segunda-feira'), (1, 'Terça-feira'), (2, 'Quarta-feira'),
+        (3, 'Quinta-feira'),  (4, 'Sexta-feira'), (5, 'Sábado'), (6, 'Domingo'),
+    ]
+
+    tipo = models.CharField(max_length=10, choices=TIPO_CHOICES, verbose_name='Tipo')
+    dia_semana = models.SmallIntegerField(
+        null=True, blank=True, choices=DIAS_SEMANA, verbose_name='Dia da semana',
+    )
+    data = models.DateField(null=True, blank=True, verbose_name='Data específica')
+    motivo = models.CharField(max_length=120, blank=True, verbose_name='Motivo / Descrição')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Bloqueio de Agenda'
+        verbose_name_plural = 'Bloqueios de Agenda'
+        ordering = ['tipo', 'dia_semana', 'data']
+
+    def __str__(self):
+        if self.tipo == 'dia_semana':
+            nome_dia = dict(self.DIAS_SEMANA).get(self.dia_semana, '?')
+            return f'Todo(a) {nome_dia} — {self.motivo or "sem motivo"}'
+        return f'{self.data:%d/%m/%Y} — {self.motivo or "sem motivo"}'
+
+
 class Comissao(models.Model):
     """
     Registro financeiro gerado ao concluir um atendimento

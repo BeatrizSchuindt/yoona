@@ -1,7 +1,8 @@
 from django import forms
 from datetime import date, datetime
+from django.db.models import Q
 from servicos.models import Servico
-from .models import Agendamento
+from .models import Agendamento, BloqueioAgenda
 
 
 class SolicitacaoAgendamentoForm(forms.Form):
@@ -44,6 +45,16 @@ class SolicitacaoAgendamentoForm(forms.Form):
         data = self.cleaned_data.get('data_agendamento')
         if data and data < date.today():
             raise forms.ValidationError('Não é possível agendar para uma data passada.')
+        if data:
+            bloqueado = BloqueioAgenda.objects.filter(
+                Q(tipo='dia_semana', dia_semana=data.weekday()) |
+                Q(tipo='data', data=data)
+            ).exists()
+            if bloqueado:
+                raise forms.ValidationError(
+                    'Esta data não está disponível para agendamentos. '
+                    'Por favor, escolha outro dia.'
+                )
         return data
 
     def clean(self):
@@ -77,5 +88,33 @@ class SolicitacaoAgendamentoForm(forms.Form):
                     'Desculpe, este horário acabou de ser preenchido. '
                     'Por favor, escolha outra opção.'
                 )
+
+        return cleaned
+
+
+class BloqueioAgendaForm(forms.ModelForm):
+    """Formulário do painel admin para criar bloqueios de agenda."""
+
+    class Meta:
+        model = BloqueioAgenda
+        fields = ['tipo', 'dia_semana', 'data', 'motivo']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        tipo       = cleaned.get('tipo')
+        dia_semana = cleaned.get('dia_semana')
+        data       = cleaned.get('data')
+
+        if tipo == 'dia_semana':
+            if dia_semana is None:
+                self.add_error('dia_semana', 'Selecione o dia da semana.')
+            cleaned['data'] = None
+        elif tipo == 'data':
+            if not data:
+                self.add_error('data', 'Informe a data específica.')
+            cleaned['dia_semana'] = None
 
         return cleaned

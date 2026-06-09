@@ -3,6 +3,27 @@
 
 {% block title %}Agendar Terapia | Yoona Head Spa{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+  /* Integração visual do Flatpickr com o tema Yoona */
+  .flatpickr-calendar { font-family: 'Inter', sans-serif; border-radius: 12px; box-shadow: 0 8px 32px rgba(12,53,40,0.15); border: 1px solid #e5e7eb; }
+  .flatpickr-day.selected, .flatpickr-day.selected:hover { background: #0C3528; border-color: #0C3528; color: #C9A84C; font-weight: 600; }
+  .flatpickr-day:hover { background: rgba(201,168,76,0.12); border-color: transparent; }
+  .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color: #d1d5db; background: transparent; cursor: not-allowed; text-decoration: line-through; }
+  .flatpickr-months .flatpickr-month { background: #0C3528; color: #C9A84C; border-radius: 12px 12px 0 0; }
+  .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: #C9A84C; fill: #C9A84C; }
+  .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg { fill: #fff; }
+  .flatpickr-current-month .flatpickr-monthDropdown-months { color: #C9A84C; background: #0C3528; }
+  .flatpickr-current-month input.cur-year { color: #C9A84C; }
+  .flatpickr-weekday { color: #6b7280; font-weight: 600; font-size: 0.75rem; }
+  .flatpickr-weekdays { background: #f9fafb; }
+  /* Domingo (col 0) em vermelho-acinzentado para indicar fechado */
+  .flatpickr-days .flatpickr-day:nth-child(7n+1) { color: #fca5a5; }
+  .flatpickr-days .flatpickr-day.flatpickr-disabled:nth-child(7n+1) { color: #fca5a5; }
+</style>
+{% endblock %}
+
 {% block content %}
 <section style="padding:3rem 1rem 4rem;max-width:680px;margin:0 auto;">
 
@@ -63,10 +84,11 @@
       <div class="ag-card-titulo">
         <span class="ag-num">2</span> Escolha a data
       </div>
-      <input type="date" name="data_agendamento" id="id_data"
+      <input type="text" name="data_agendamento" id="id_data"
              class="ag-input-data"
-             min="{{ hoje }}"
-             value="{{ form.data_agendamento.value|default:hoje }}"
+             placeholder="Selecione uma data"
+             value="{{ form.data_agendamento.value|default:'' }}"
+             readonly
              required>
       {% if form.data_agendamento.errors %}
         <p class="ag-erro">{{ form.data_agendamento.errors|join:" " }}</p>
@@ -267,14 +289,14 @@
     verificarResumo();
   });
 
-  // ── Data ────────────────────────────────────────────────────────────────
-  document.getElementById('id_data').addEventListener('change', function () {
-    estado.data = this.value;
+  // ── Data: controlada pelo Flatpickr (inicializado no extra_js) ──────────
+  function aoSelecionarData(dateStr) {
+    estado.data = dateStr;
     estado.hora = '';
     document.getElementById('horario_agendamento').value = '';
-    carregarHorarios(this.value);
+    carregarHorarios(dateStr);
     verificarResumo();
-  });
+  }
 
   // ── Grade de horários ────────────────────────────────────────────────────
   function renderizarGrade(slots) {
@@ -367,4 +389,33 @@
   })();
 </script>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+<script>
+  // Bloqueios vindos do Django (dias da semana em weekday() Python: 0=Seg … 6=Dom)
+  const diasBloqueadosPy   = {{ dias_semana_bloqueados|safe }};
+  const datasEspecificas   = {{ datas_especificas|safe }};
+
+  // Converte para JS getDay() (0=Dom, 1=Seg … 6=Sab): py → js = (py + 1) % 7
+  const diasBloqueadosJS = diasBloqueadosPy.map(d => (d + 1) % 7);
+
+  flatpickr('#id_data', {
+    locale: 'pt',
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
+    disable: [
+      ...datasEspecificas,
+      function(date) {
+        return diasBloqueadosJS.includes(date.getDay());
+      }
+    ],
+    onChange: function(selectedDates, dateStr) {
+      aoSelecionarData(dateStr);
+    },
+    defaultDate: '{{ form.data_agendamento.value|default:"" }}' || null,
+  });
+</script>
 {% endblock %}
