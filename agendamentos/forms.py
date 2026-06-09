@@ -1,5 +1,5 @@
 from django import forms
-from datetime import date
+from datetime import date, datetime
 from servicos.models import Servico
 from .models import Agendamento
 
@@ -59,6 +59,13 @@ class SolicitacaoAgendamentoForm(forms.Form):
             )
 
         if data and horario:
+            # Rejeita horários que já passaram quando a data é hoje
+            if data == date.today() and horario <= datetime.now().time():
+                self.add_error(
+                    'horario_agendamento',
+                    'Este horário já passou. Por favor, escolha um horário futuro.'
+                )
+
             # Verifica conflito de horário (sem lock — feito de novo na view com select_for_update)
             conflito = Agendamento.objects.filter(
                 data_agendamento=data,

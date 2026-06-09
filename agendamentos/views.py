@@ -1,5 +1,5 @@
 import json
-from datetime import date, time
+from datetime import date, time, datetime
 
 from django.views import View
 from django.shortcuts import render, redirect
@@ -29,7 +29,7 @@ def _gerar_slots():
 def _slots_disponiveis(data_escolhida):
     """
     Retorna lista de strings 'HH:MM' com os slots livres para a data informada.
-    Um slot é bloqueado se já existe Agendamento aguardando ou confirmado nele.
+    Bloqueia slots já agendados e, para hoje, os horários que já passaram.
     """
     todos = _gerar_slots()
     ocupados = set(
@@ -38,7 +38,15 @@ def _slots_disponiveis(data_escolhida):
             status__in=['aguardando', 'confirmado'],
         ).values_list('horario_agendamento', flat=True)
     )
-    return [t.strftime('%H:%M') for t in todos if t not in ocupados]
+
+    # Para hoje, descarta slots cujo horário já passou
+    hora_limite = datetime.now().time() if data_escolhida == date.today() else None
+
+    return [
+        t.strftime('%H:%M')
+        for t in todos
+        if t not in ocupados and (hora_limite is None or t > hora_limite)
+    ]
 
 
 # ---------------------------------------------------------------------------
