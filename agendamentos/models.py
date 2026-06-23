@@ -110,6 +110,17 @@ class Voucher(models.Model):
             desconto = self.valor_desconto
         return min(desconto, valor_original)
 
+    def motivo_indisponivel(self):
+        """
+        Retorna a mensagem de erro caso o voucher não possa ser aplicado,
+        ou None se estiver válido para uso (US09).
+        """
+        if self.status_voucher != 'ativo' or self.expirado:
+            return 'Este código promocional é inválido ou já expirou.'
+        if not self.ilimitado and self.usos_realizados >= self.limite_uso:
+            return 'Este cupom já atingiu o limite máximo de utilizações.'
+        return None
+
 
 class Agendamento(models.Model):
     """

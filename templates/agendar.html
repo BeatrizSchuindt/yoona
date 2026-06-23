@@ -53,9 +53,10 @@
 
   <form method="post" id="form-agendamento" novalidate>
     {% csrf_token %}
-    <!-- campo hidden para horário e pagamento (preenchido via JS) -->
+    <!-- campo hidden para horário, pagamento e voucher (preenchido via JS) -->
     <input type="hidden" name="horario_agendamento" id="horario_agendamento">
     <input type="hidden" name="metodo_pagamento"    id="metodo_pagamento">
+    <input type="hidden" name="codigo_voucher"       id="codigo_voucher" value="{{ codigo_voucher }}">
 
     <!-- ── PASSO 1: Serviço ───────────────────────────────────────────── -->
     <div class="ag-card" id="card-servico">
@@ -134,6 +135,24 @@
       {% endif %}
     </div>
 
+    <!-- ── PASSO 5: Cupom de desconto (opcional) ─────────────────────── -->
+    <div class="ag-card">
+      <div class="ag-card-titulo">
+        <span class="ag-num">5</span> Cupom de desconto (opcional)
+      </div>
+      <div style="display:flex;gap:0.6rem;align-items:stretch;">
+        <input type="text" id="input-voucher"
+               class="ag-select" style="flex:1;text-transform:uppercase;"
+               placeholder="Digite o código do cupom"
+               autocomplete="off">
+        <button type="button" id="btn-aplicar-voucher" class="ag-voucher-btn"
+                onclick="aplicarVoucher()">Aplicar</button>
+        <button type="button" id="btn-remover-voucher" class="ag-voucher-btn ag-voucher-remover"
+                onclick="removerVoucher()" style="display:none;">Remover</button>
+      </div>
+      <p id="msg-voucher" style="font-size:0.8rem;margin-top:0.5rem;display:none;"></p>
+    </div>
+
     <!-- ── RESUMO ────────────────────────────────────────────────────── -->
     <div class="ag-card" id="resumo" style="display:none;background:#f0fdf4;
          border-color:#bbf7d0;">
@@ -158,8 +177,16 @@
           <strong id="res-pagamento">—</strong>
         </div>
         <div style="display:flex;justify-content:space-between;border-top:1px solid #bbf7d0;padding-top:0.5rem;margin-top:0.25rem;">
-          <span style="color:#6b7280;">Valor base</span>
-          <strong id="res-preco" style="color:#0C3528;font-size:1rem;">—</strong>
+          <span style="color:#6b7280;">Valor original</span>
+          <strong id="res-original" style="color:#374151;">—</strong>
+        </div>
+        <div id="res-linha-desconto" style="justify-content:space-between;display:none;">
+          <span id="res-desconto-label" style="color:#16a34a;">Desconto</span>
+          <strong id="res-desconto-valor" style="color:#16a34a;">—</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#6b7280;font-weight:600;">Total a pagar</span>
+          <strong id="res-total" style="color:#0C3528;font-size:1.1rem;">—</strong>
         </div>
       </div>
     </div>
@@ -232,6 +259,13 @@
   .ag-pgto-btn.selecionado i { color:#C9A84C; }
   .ag-erro { color:#dc2626;font-size:0.78rem;margin-top:0.35rem; }
   #btn-confirmar:not([disabled]):not([style*="pointer-events:none"]):hover { opacity:0.85; }
+  .ag-voucher-btn {
+    padding:0.7rem 1.1rem;border:none;border-radius:8px;background:#0C3528;color:#C9A84C;
+    font-size:0.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;
+  }
+  .ag-voucher-btn:hover { opacity:0.85; }
+  .ag-voucher-btn:disabled { opacity:0.5;cursor:wait; }
+  .ag-voucher-remover { background:#fff;color:#dc2626;border:1px solid #fecaca; }
 </style>
 
 <!-- ===== JAVASCRIPT ===== -->
@@ -242,6 +276,7 @@
     data:       '',
     hora:       '',
     pagamento:  { valor:'', label:'' },
+    voucher:    { codigo:'', desconto:0, total:0, aplicado:false },
   };
 
   // Slots pré-carregados para a data de hoje (passados pelo Django)
@@ -254,6 +289,25 @@
     return `${d}/${m}/${a}`;
   }
 
+  // ── Formatação/parse de valores (independe de L10N do Django) ─────────────
+  function brl(num)    { return 'R$ ' + Number(num).toFixed(2).replace('.', ','); }
+  function precoNum()  { return parseFloat(String(estado.servico.preco || '0').replace(',', '.')) || 0; }
+
+  function atualizarValores() {
+    const original = precoNum();
+    document.getElementById('res-original').textContent = brl(original);
+    const linha = document.getElementById('res-linha-desconto');
+    if (estado.voucher.aplicado) {
+      document.getElementById('res-desconto-label').textContent = 'Desconto (' + estado.voucher.codigo + ')';
+      document.getElementById('res-desconto-valor').textContent = '− ' + brl(estado.voucher.desconto);
+      linha.style.display = 'flex';
+      document.getElementById('res-total').textContent = brl(estado.voucher.total);
+    } else {
+      linha.style.display = 'none';
+      document.getElementById('res-total').textContent = brl(original);
+    }
+  }
+
   function verificarResumo() {
     const ok = estado.servico.nome && estado.data && estado.hora && estado.pagamento.valor;
     const resumo = document.getElementById('resumo');
@@ -263,7 +317,7 @@
       document.getElementById('res-duracao').textContent  = estado.servico.duracao + ' min';
       document.getElementById('res-data-hora').textContent = formatarData(estado.data) + ' às ' + estado.hora;
       document.getElementById('res-pagamento').textContent = estado.pagamento.label;
-      document.getElementById('res-preco').textContent    = 'R$ ' + estado.servico.preco;
+      atualizarValores();
       resumo.style.display = 'block';
       btn.style.opacity = '1';
       btn.style.pointerEvents = 'auto';
@@ -272,6 +326,71 @@
       btn.style.opacity = '0.45';
       btn.style.pointerEvents = 'none';
     }
+  }
+
+  // ── Voucher (US09) ────────────────────────────────────────────────────────
+  function mostrarMsgVoucher(texto, sucesso) {
+    const msg = document.getElementById('msg-voucher');
+    msg.textContent = texto;
+    msg.style.display = 'block';
+    msg.style.color = sucesso ? '#16a34a' : '#dc2626';
+  }
+
+  function aplicarVoucher() {
+    const codigo    = document.getElementById('input-voucher').value.trim().toUpperCase();
+    const servicoId = document.getElementById('id_servico').value;
+
+    if (!codigo)    { mostrarMsgVoucher('Digite um código de cupom.', false); return; }
+    if (!servicoId) { mostrarMsgVoucher('Escolha a terapia antes de aplicar o cupom.', false); return; }
+
+    const btn = document.getElementById('btn-aplicar-voucher');
+    btn.disabled = true; btn.textContent = '…';
+
+    const corpo = new URLSearchParams({ codigo: codigo, servico_id: servicoId });
+    fetch("{% url 'agendamentos:validar_voucher' %}", {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: corpo.toString(),
+    })
+    .then(r => r.json())
+    .then(json => {
+      btn.disabled = false; btn.textContent = 'Aplicar';
+      if (json.valido) {
+        estado.voucher = {
+          codigo:   json.codigo,
+          desconto: parseFloat(json.valor_desconto),
+          total:    parseFloat(json.valor_total),
+          aplicado: true,
+        };
+        document.getElementById('codigo_voucher').value = json.codigo;
+        document.getElementById('input-voucher').value  = json.codigo;
+        document.getElementById('input-voucher').readOnly = true;
+        document.getElementById('btn-aplicar-voucher').style.display = 'none';
+        document.getElementById('btn-remover-voucher').style.display = '';
+        mostrarMsgVoucher('Cupom aplicado!', true);
+        atualizarValores();
+      } else {
+        mostrarMsgVoucher(json.mensagem, false);
+      }
+    })
+    .catch(() => {
+      btn.disabled = false; btn.textContent = 'Aplicar';
+      mostrarMsgVoucher('Erro ao validar o cupom. Tente novamente.', false);
+    });
+  }
+
+  function removerVoucher() {
+    estado.voucher = { codigo:'', desconto:0, total:0, aplicado:false };
+    document.getElementById('codigo_voucher').value = '';
+    document.getElementById('input-voucher').value  = '';
+    document.getElementById('input-voucher').readOnly = false;
+    document.getElementById('btn-remover-voucher').style.display = 'none';
+    document.getElementById('btn-aplicar-voucher').style.display = '';
+    document.getElementById('msg-voucher').style.display = 'none';
+    atualizarValores();
   }
 
   // ── Serviço ──────────────────────────────────────────────────────────────
@@ -285,6 +404,11 @@
       };
     } else {
       estado.servico = { nome:'', duracao:'', preco:'' };
+    }
+    // Recalcula o cupom sobre o novo preço (ou remove se nenhum serviço)
+    if (estado.voucher.aplicado) {
+      if (opt.value) { aplicarVoucher(); }
+      else           { removerVoucher(); }
     }
     verificarResumo();
   });
@@ -383,6 +507,15 @@
           document.getElementById('metodo_pagamento').value = pgtoHidden;
         }
       });
+    }
+
+    // Restaura o cupom aplicado após um erro de validação (re-render do POST)
+    const voucherSalvo = '{{ codigo_voucher|escapejs }}';
+    if (voucherSalvo) {
+      document.getElementById('input-voucher').value = voucherSalvo;
+      if (document.getElementById('id_servico').value) {
+        aplicarVoucher();
+      }
     }
 
     verificarResumo();

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    SolicitacaoView, HorariosDisponiveisView,
+    SolicitacaoView, HorariosDisponiveisView, ValidarVoucherView,
     GerenciarBloqueiosView, RemoverBloqueioView,
     GestaoAgendaView, AtualizarAgendamentoView,
     VoucherListView, VoucherCreateView, VoucherUpdateView, VoucherToggleStatusView,
@@ -12,6 +12,7 @@ urlpatterns = [
     # Fluxo do cliente
     path('agendar/servico/', SolicitacaoView.as_view(), name='solicitacao'),
     path('agendar/horarios/', HorariosDisponiveisView.as_view(), name='horarios_disponiveis'),
+    path('agendar/voucher/validar/', ValidarVoucherView.as_view(), name='validar_voucher'),
 
     # Painel admin — Gestão diária de agendamentos
     path('painel/admin/agenda/', GestaoAgendaView.as_view(), name='gestao_agenda'),

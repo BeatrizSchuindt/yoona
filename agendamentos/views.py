@@ -108,7 +108,7 @@ class SolicitacaoView(View):
         except Cliente.DoesNotExist:
             return None
 
-    def _contexto_base(self, request, cliente, form, data_escolhida=None):
+    def _contexto_base(self, request, cliente, form, data_escolhida=None, codigo_voucher=''):
         if data_escolhida is None:
             data_escolhida = date.today()
         dias_semana, datas_especificas = _dados_bloqueios()
@@ -121,6 +121,7 @@ class SolicitacaoView(View):
             'pagamento_choices': Agendamento.PAGAMENTO_CHOICES,
             'dias_semana_bloqueados': json.dumps(dias_semana),
             'datas_especificas': json.dumps(datas_especificas),
+            'codigo_voucher': codigo_voucher,
         }
 
     def get(self, request):
@@ -142,6 +143,9 @@ class SolicitacaoView(View):
 
         form = SolicitacaoAgendamentoForm(request.POST)
 
+        # Código de voucher aplicado pela cliente (campo hidden do form)
+        codigo_voucher = (request.POST.get('codigo_voucher') or '').strip().upper()
+
         # Recupera a data escolhida para re-exibir slots corretos em caso de erro
         data_str = request.POST.get('data_agendamento', date.today().isoformat())
         try:
@@ -151,9 +155,11 @@ class SolicitacaoView(View):
 
         if not form.is_valid():
             return render(request, self.template_name,
-                          self._contexto_base(request, cliente, form, data_escolhida))
+                          self._contexto_base(request, cliente, form,
+                                              data_escolhida, codigo_voucher))
 
         dados = form.cleaned_data
+        voucher_invalido = False
 
         # ── Race condition: re-verifica com lock antes de inserir ─────────
         with transaction.atomic():
@@ -171,7 +177,27 @@ class SolicitacaoView(View):
                 )
                 return render(request, self.template_name,
                               self._contexto_base(request, cliente, form,
-                                                  dados['data_agendamento']))
+                                                  dados['data_agendamento'],
+                                                  codigo_voucher))
+
+            # ── Voucher: re-valida no servidor e aplica (incrementa o uso) ──
+            preco = dados['servico'].preco_base
+            voucher_obj = None
+            if codigo_voucher:
+                voucher_obj = (
+                    Voucher.objects.select_for_update()
+                    .filter(codigo_promocional__iexact=codigo_voucher)
+                    .first()
+                )
+                if voucher_obj and voucher_obj.motivo_indisponivel() is None:
+                    desconto = voucher_obj.calcular_desconto(preco)
+                    preco = max(preco - desconto, Decimal('0.00'))
+                    voucher_obj.usos_realizados += 1
+                    voucher_obj.save(update_fields=['usos_realizados'])
+                else:
+                    # Cupom ficou indisponível entre "Aplicar" e "Confirmar"
+                    voucher_obj = None
+                    voucher_invalido = True
 
             agendamento = Agendamento.objects.create(
                 cliente=cliente,
@@ -180,11 +206,19 @@ class SolicitacaoView(View):
                 horario_agendamento=dados['horario_agendamento'],
                 metodo_pagamento=dados['metodo_pagamento'],
                 status='aguardando',
-                valor_final=dados['servico'].preco_base,
+                voucher=voucher_obj,
+                valor_final=preco,
             )
 
         # Persiste agendamento_id para a etapa de anamnese (US06)
         request.session['agendamento_id'] = agendamento.pk
+
+        if voucher_invalido:
+            messages.warning(
+                request,
+                'O cupom informado não está mais disponível e não foi aplicado. '
+                'O agendamento foi reservado pelo valor integral.'
+            )
 
         messages.success(
             request,
@@ -215,6 +249,62 @@ class HorariosDisponiveisView(View):
             return JsonResponse({'disponiveis': []})
 
         return JsonResponse({'disponiveis': _slots_disponiveis(data_escolhida)})
+
+
+# ---------------------------------------------------------------------------
+# US09 — Validação de voucher (preview, não consome o limite)
+# ---------------------------------------------------------------------------
+
+class ValidarVoucherView(View):
+    """
+    POST /agendar/voucher/validar/  (chamado via AJAX pelo botão "Aplicar")
+    Body: codigo, servico_id
+    Apenas valida e calcula o preview do desconto — NÃO incrementa o uso.
+    Retorna JSON:
+      sucesso → {valido, codigo, valor_original, valor_desconto, valor_total}
+      falha   → {valido: False, mensagem}
+    """
+
+    def post(self, request):
+        codigo = (request.POST.get('codigo') or '').strip().upper()
+        servico_id = request.POST.get('servico_id')
+
+        if not codigo:
+            return JsonResponse({'valido': False, 'mensagem': 'Digite um código de cupom.'})
+
+        # Preço de referência: o serviço escolhido
+        try:
+            servico = Servico.objects.get(pk=servico_id, ativo=True)
+        except (Servico.DoesNotExist, ValueError, TypeError):
+            return JsonResponse({
+                'valido': False,
+                'mensagem': 'Selecione uma terapia antes de aplicar o cupom.',
+            })
+
+        # Existência (case-insensitive)
+        voucher = Voucher.objects.filter(codigo_promocional__iexact=codigo).first()
+        if not voucher:
+            return JsonResponse({
+                'valido': False,
+                'mensagem': 'Este código promocional é inválido ou já expirou.',
+            })
+
+        # Status / validade / limite
+        erro = voucher.motivo_indisponivel()
+        if erro:
+            return JsonResponse({'valido': False, 'mensagem': erro})
+
+        valor_original = servico.preco_base
+        valor_desconto = voucher.calcular_desconto(valor_original)
+        valor_total = max(valor_original - valor_desconto, Decimal('0.00'))
+
+        return JsonResponse({
+            'valido': True,
+            'codigo': voucher.codigo_promocional,
+            'valor_original': f'{valor_original:.2f}',
+            'valor_desconto': f'{valor_desconto:.2f}',
+            'valor_total': f'{valor_total:.2f}',
+        })
 
 
 # ---------------------------------------------------------------------------
