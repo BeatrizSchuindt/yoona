@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.urls import reverse, reverse_lazy
 
 from servicos.views import AdminStaffRequiredMixin
@@ -368,7 +368,7 @@ class GestaoAgendaView(AdminStaffRequiredMixin, View):
         agendamentos = (
             Agendamento.objects
             .filter(data_agendamento=data_filtro)
-            .select_related('cliente', 'servico', 'terapeuta')
+            .select_related('cliente', 'servico', 'terapeuta', 'comissao')
             .order_by('horario_agendamento')
         )
 
@@ -502,3 +502,56 @@ class VoucherToggleStatusView(AdminStaffRequiredMixin, View):
             messages.success(request, f'Voucher "{voucher.codigo_promocional}" ativado.')
         voucher.save()
         return redirect('agendamentos:gestao_vouchers')
+
+
+# ---------------------------------------------------------------------------
+# US10 — Relatório de Comissões (fechamento de caixa)
+# ---------------------------------------------------------------------------
+
+class RelatorioComissoesView(AdminStaffRequiredMixin, View):
+    """
+    Lista os registros imutáveis de comissão, base para o fechamento de caixa.
+    Filtros (GET): terapeuta, data_inicio, data_fim (sobre a data de registro).
+    Exibe o total do período e a quantidade de atendimentos.
+    """
+    template_name = 'relatorio_comissoes.html'
+
+    def get(self, request):
+        comissoes = (
+            Comissao.objects
+            .select_related('terapeuta', 'agendamento', 'agendamento__cliente', 'agendamento__servico')
+            .order_by('-data_registro')
+        )
+
+        # Filtro por terapeuta
+        terapeuta_id = request.GET.get('terapeuta') or ''
+        if terapeuta_id:
+            comissoes = comissoes.filter(terapeuta_id=terapeuta_id)
+
+        # Filtro por período (data de registro)
+        data_inicio = request.GET.get('data_inicio') or ''
+        data_fim = request.GET.get('data_fim') or ''
+        if data_inicio:
+            try:
+                comissoes = comissoes.filter(data_registro__date__gte=date.fromisoformat(data_inicio))
+            except ValueError:
+                data_inicio = ''
+        if data_fim:
+            try:
+                comissoes = comissoes.filter(data_registro__date__lte=date.fromisoformat(data_fim))
+            except ValueError:
+                data_fim = ''
+
+        total = comissoes.aggregate(soma=Sum('valor_calculado'))['soma'] or Decimal('0.00')
+        # SQLite devolve a soma como float; normaliza para 2 casas decimais
+        total = Decimal(str(total)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        return render(request, self.template_name, {
+            'comissoes': comissoes,
+            'total': total,
+            'quantidade': comissoes.count(),
+            'terapeutas': Terapeuta.objects.order_by('nome_terapeuta'),
+            'terapeuta_sel': terapeuta_id,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+        })

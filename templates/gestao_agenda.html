@@ -17,7 +17,7 @@
     <i class="fas fa-calendar-times"></i> Bloqueios de Agenda
   </a>
   <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
-  <a href="#"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
 </div>
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
@@ -85,6 +85,7 @@
           <th>Valor</th>
           <th>Pagamento</th>
           <th>Status</th>
+          <th>Comissão</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -152,6 +153,18 @@
               {% endif %}
             </td>
 
+            <!-- Comissão -->
+            <td>
+              {% if ag.status == 'concluido' %}
+                <strong style="color:#15803d;">R$ {{ ag.comissao.valor_calculado }}</strong>
+              {% else %}
+                <span style="font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:20px;
+                             background:rgba(148,163,184,0.15);color:#64748b;border:1px solid rgba(148,163,184,0.35);">
+                  Pendente
+                </span>
+              {% endif %}
+            </td>
+
             <!-- Ações -->
             <td>
               <div style="display:flex;gap:0.4rem;align-items:center;">
@@ -170,7 +183,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="8" class="tabela-vazia">
+            <td colspan="9" class="tabela-vazia">
               <i class="fas fa-calendar-day" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
               Nenhum agendamento para esta data.
             </td>
