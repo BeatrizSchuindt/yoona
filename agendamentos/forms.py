@@ -2,7 +2,7 @@ from django import forms
 from datetime import date, datetime
 from django.db.models import Q
 from servicos.models import Servico
-from .models import Agendamento, BloqueioAgenda
+from .models import Agendamento, BloqueioAgenda, Voucher
 
 
 class SolicitacaoAgendamentoForm(forms.Form):
@@ -116,5 +116,79 @@ class BloqueioAgendaForm(forms.ModelForm):
             if not data:
                 self.add_error('data', 'Informe a data específica.')
             cleaned['dia_semana'] = None
+
+        return cleaned
+
+
+# ---------------------------------------------------------------------------
+# Formulário de Voucher (US08)
+# ---------------------------------------------------------------------------
+
+class VoucherForm(forms.ModelForm):
+    """
+    Cadastro e edição de vouchers.
+    - Código convertido para maiúsculas e validado como único.
+    - Desconto percentual limitado a 1–100.
+    - Limite em branco/0 = uso ilimitado.
+    - Edição restrita: se já houve uso, Tipo e Valor ficam bloqueados.
+    """
+
+    class Meta:
+        model = Voucher
+        fields = [
+            'codigo_promocional', 'tipo_desconto', 'valor_desconto',
+            'limite_uso', 'data_validade', 'status_voucher',
+        ]
+        widgets = {
+            'codigo_promocional': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: BEMVINDO',
+                'style': 'text-transform:uppercase;',
+            }),
+            'tipo_desconto': forms.Select(attrs={'class': 'form-control'}),
+            'valor_desconto': forms.NumberInput(attrs={
+                'class': 'form-control', 'step': '0.01', 'placeholder': '0.00',
+            }),
+            'limite_uso': forms.NumberInput(attrs={
+                'class': 'form-control', 'min': '0', 'placeholder': 'Em branco = ilimitado',
+            }),
+            'data_validade': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'status_voucher': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Proteção financeira: voucher já utilizado não altera tipo nem valor
+        if self.instance and self.instance.pk and self.instance.usos_realizados > 0:
+            self.fields['tipo_desconto'].disabled = True
+            self.fields['valor_desconto'].disabled = True
+
+    def clean_codigo_promocional(self):
+        codigo = self.cleaned_data['codigo_promocional'].strip().upper()
+        qs = Voucher.objects.filter(codigo_promocional__iexact=codigo)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError(
+                'Este código promocional já existe. Por favor, escolha outro nome.'
+            )
+        return codigo
+
+    def clean_limite_uso(self):
+        limite = self.cleaned_data.get('limite_uso')
+        # None ou 0 → ilimitado
+        return limite or None
+
+    def clean(self):
+        cleaned = super().clean()
+        tipo  = cleaned.get('tipo_desconto')
+        valor = cleaned.get('valor_desconto')
+
+        if tipo == 'percentual' and valor is not None:
+            if valor < 1 or valor > 100:
+                self.add_error(
+                    'valor_desconto',
+                    'Para desconto percentual, informe um valor entre 1 e 100.'
+                )
 
         return cleaned

@@ -1,0 +1,142 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Editar Voucher | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}" class="ativo"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="#"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'agendamentos:gestao_vouchers' %}">Vouchers</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Editar Voucher</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Editar Voucher: <em style="color:var(--gold);font-style:normal;">{{ object.codigo_promocional }}</em></h1>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}" class="btn-admin btn-admin-outline">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+{% if object.usos_realizados > 0 %}
+  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
+              padding:0.85rem 1rem;margin-bottom:1rem;color:#9a3412;font-size:0.82rem;max-width:620px;">
+    <i class="fas fa-lock" style="margin-right:0.4rem;"></i>
+    Este voucher já foi utilizado <strong>{{ object.usos_realizados }}</strong> vez(es).
+    Por segurança contábil, <strong>Tipo</strong> e <strong>Valor do desconto</strong> não podem mais ser alterados.
+  </div>
+{% endif %}
+
+<div class="card" style="max-width:620px;">
+  <div class="card-header">
+    <h3><i class="fas fa-ticket-alt" style="color:var(--gold);margin-right:0.5rem;"></i>Dados do voucher</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-admin">
+
+        <!-- Código -->
+        <div class="form-group">
+          <label for="{{ form.codigo_promocional.id_for_label }}">Código promocional *</label>
+          {{ form.codigo_promocional }}
+          {% for erro in form.codigo_promocional.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+        </div>
+
+        <!-- Tipo + Valor -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              Tipo de desconto *
+              {% if form.tipo_desconto.field.disabled %}<i class="fas fa-lock" style="font-size:0.7rem;color:var(--texto-muted);margin-left:0.2rem;" title="Bloqueado: voucher já utilizado"></i>{% endif %}
+            </label>
+            {% if form.tipo_desconto.field.disabled %}
+              <div style="padding:0.5rem 0.75rem;background:var(--superficie-alt,#f3f3f1);border:1px solid var(--borda-sutil);
+                          border-radius:8px;color:var(--texto-muted);font-size:0.88rem;cursor:not-allowed;
+                          display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-lock" style="font-size:0.7rem;opacity:0.6;"></i>
+                {{ object.get_tipo_desconto_display }}
+              </div>
+            {% else %}
+              {{ form.tipo_desconto }}
+            {% endif %}
+            {% for erro in form.tipo_desconto.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label>
+              Valor do desconto *
+              {% if form.valor_desconto.field.disabled %}<i class="fas fa-lock" style="font-size:0.7rem;color:var(--texto-muted);margin-left:0.2rem;" title="Bloqueado: voucher já utilizado"></i>{% endif %}
+            </label>
+            {% if form.valor_desconto.field.disabled %}
+              <div style="padding:0.5rem 0.75rem;background:var(--superficie-alt,#f3f3f1);border:1px solid var(--borda-sutil);
+                          border-radius:8px;color:var(--texto-muted);font-size:0.88rem;cursor:not-allowed;
+                          display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-lock" style="font-size:0.7rem;opacity:0.6;"></i>
+                {% if object.tipo_desconto == 'percentual' %}{{ object.valor_desconto }}%{% else %}R$ {{ object.valor_desconto }}{% endif %}
+              </div>
+            {% else %}
+              {{ form.valor_desconto }}
+            {% endif %}
+            {% for erro in form.valor_desconto.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <!-- Limite + Validade -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.limite_uso.id_for_label }}">Limite de uso total</label>
+            {{ form.limite_uso }}
+            {% for erro in form.limite_uso.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+            <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">
+              Em branco ou 0 = uso ilimitado.
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="{{ form.data_validade.id_for_label }}">Data de validade</label>
+            {{ form.data_validade }}
+            {% for erro in form.data_validade.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label for="{{ form.status_voucher.id_for_label }}">Status</label>
+          {{ form.status_voucher }}
+          {% for erro in form.status_voucher.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="form-erros" style="margin-top:1rem;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-acoes">
+          <a href="{% url 'agendamentos:gestao_vouchers' %}" class="btn-admin btn-admin-outline">Cancelar</a>
+          <button type="submit" class="btn-admin btn-admin-primario btn-admin-lg">
+            <i class="fas fa-save"></i> Salvar alterações
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -3,19 +3,20 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, time, datetime, timedelta
 
 from django.views import View
+from django.views.generic import ListView, CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Q
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 from servicos.views import AdminStaffRequiredMixin
 from servicos.models import Servico
 from clientes.models import Cliente
 from terapeutas.models import Terapeuta
-from .models import Agendamento, BloqueioAgenda, Comissao
-from .forms import SolicitacaoAgendamentoForm, BloqueioAgendaForm
+from .models import Agendamento, BloqueioAgenda, Comissao, Voucher
+from .forms import SolicitacaoAgendamentoForm, BloqueioAgendaForm, VoucherForm
 
 
 # ---------------------------------------------------------------------------
@@ -361,3 +362,53 @@ class AtualizarAgendamentoView(AdminStaffRequiredMixin, View):
         agendamento.save()
         messages.success(request, 'Agendamento atualizado com sucesso.')
         return redirect(destino)
+
+
+# ---------------------------------------------------------------------------
+# US08 — Gestão de Vouchers
+# ---------------------------------------------------------------------------
+
+class VoucherListView(AdminStaffRequiredMixin, ListView):
+    """Lista todos os vouchers cadastrados."""
+    model = Voucher
+    template_name = 'gestao_vouchers.html'
+    context_object_name = 'vouchers'
+
+
+class VoucherCreateView(AdminStaffRequiredMixin, CreateView):
+    """Cadastro de novo voucher."""
+    model = Voucher
+    form_class = VoucherForm
+    template_name = 'novo_voucher.html'
+    success_url = reverse_lazy('agendamentos:gestao_vouchers')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Voucher cadastrado com sucesso!')
+        return super().form_valid(form)
+
+
+class VoucherUpdateView(AdminStaffRequiredMixin, UpdateView):
+    """Edição de voucher (Tipo e Valor travados se já utilizado)."""
+    model = Voucher
+    form_class = VoucherForm
+    template_name = 'editar_voucher.html'
+    success_url = reverse_lazy('agendamentos:gestao_vouchers')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Voucher atualizado com sucesso!')
+        return super().form_valid(form)
+
+
+class VoucherToggleStatusView(AdminStaffRequiredMixin, View):
+    """Alterna o status do voucher entre ativo e inativo (botão Ativar/Inativar)."""
+
+    def post(self, request, pk):
+        voucher = get_object_or_404(Voucher, pk=pk)
+        if voucher.status_voucher == 'ativo':
+            voucher.status_voucher = 'inativo'
+            messages.success(request, f'Voucher "{voucher.codigo_promocional}" inativado.')
+        else:
+            voucher.status_voucher = 'ativo'
+            messages.success(request, f'Voucher "{voucher.codigo_promocional}" ativado.')
+        voucher.save()
+        return redirect('agendamentos:gestao_vouchers')

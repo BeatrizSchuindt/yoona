@@ -3,6 +3,7 @@ from .views import (
     SolicitacaoView, HorariosDisponiveisView,
     GerenciarBloqueiosView, RemoverBloqueioView,
     GestaoAgendaView, AtualizarAgendamentoView,
+    VoucherListView, VoucherCreateView, VoucherUpdateView, VoucherToggleStatusView,
 )
 
 app_name = 'agendamentos'
@@ -19,4 +20,10 @@ urlpatterns = [
     # Painel admin — Bloqueios de agenda
     path('painel/admin/agenda/bloqueios/', GerenciarBloqueiosView.as_view(), name='gerenciar_bloqueios'),
     path('painel/admin/agenda/bloqueios/<int:pk>/remover/', RemoverBloqueioView.as_view(), name='remover_bloqueio'),
+
+    # Painel admin — Gestão de vouchers
+    path('painel/admin/vouchers/', VoucherListView.as_view(), name='gestao_vouchers'),
+    path('painel/admin/vouchers/novo/', VoucherCreateView.as_view(), name='novo_voucher'),
+    path('painel/admin/vouchers/<int:pk>/editar/', VoucherUpdateView.as_view(), name='editar_voucher'),
+    path('painel/admin/vouchers/<int:pk>/status/', VoucherToggleStatusView.as_view(), name='toggle_voucher'),
 ]
