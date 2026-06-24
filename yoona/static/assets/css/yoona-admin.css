@@ -509,8 +509,16 @@ table.tabela tbody tr:hover td { background: rgba(255,255,255,0.018); }
   border-color: var(--gold);
   outline: none;
 }
-.form-admin select option { background: var(--sidebar-bg); }
 .form-admin textarea { resize: vertical; min-height: 85px; }
+
+/* Opções de dropdown legíveis em QUALQUER <select> do painel
+   (inclusive os das tabelas, que ficam fora de .form-admin).
+   Sem isto, o popup do navegador usa fundo branco e o texto claro some. */
+select option,
+select optgroup {
+  background-color: var(--surface2);
+  color: var(--branco);
+}
 
 .form-admin .errorlist {
   list-style: none;

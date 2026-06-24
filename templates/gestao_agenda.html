@@ -44,7 +44,7 @@
     <input type="date" id="data" name="data" value="{{ data_filtro }}"
            onchange="this.form.submit()"
            style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
-                  background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+                  background:var(--surface2);color:var(--texto);font-size:0.85rem;">
   </form>
 </div>
 
@@ -111,7 +111,7 @@
               {% else %}
                 <select name="terapeuta" form="form-ag-{{ ag.pk }}"
                         style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
-                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               border-radius:6px;background:var(--surface2);color:var(--texto);
                                font-size:0.78rem;max-width:150px;">
                   <option value="">— Selecione —</option>
                   {% for t in terapeutas %}
@@ -144,7 +144,7 @@
               {% else %}
                 <select name="status" form="form-ag-{{ ag.pk }}"
                         style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
-                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               border-radius:6px;background:var(--surface2);color:var(--texto);
                                font-size:0.78rem;">
                   {% for valor, label in status_choices %}
                     <option value="{{ valor }}" {% if ag.status == valor %}selected{% endif %}>{{ label }}</option>

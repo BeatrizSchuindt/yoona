@@ -560,7 +560,7 @@ a:hover { color: var(--gold-light); }
   background: rgba(201,168,76,0.04);
   outline: none;
 }
-.form-group select option { background: var(--bg-surface); }
+.form-group select option { background: var(--bg-surface); color: var(--branco); }
 .form-group textarea { resize: vertical; min-height: 80px; }
 
 .form-group .ajuda {
