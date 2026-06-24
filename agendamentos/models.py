@@ -1,3 +1,4 @@
+from datetime import date
 from django.db import models
 from django.core.validators import MinValueValidator
 from clientes.models import Cliente
@@ -44,13 +45,21 @@ class Voucher(models.Model):
         verbose_name='Status',
     )
     limite_uso = models.PositiveIntegerField(
+        null=True,
+        blank=True,
         verbose_name='Limite de usos',
-        help_text='Quantas vezes este voucher pode ser utilizado no total.',
+        help_text='Quantas vezes este voucher pode ser utilizado no total. Em branco ou 0 = ilimitado.',
     )
     usos_realizados = models.PositiveIntegerField(
         default=0,
         verbose_name='Usos realizados',
         help_text='Contador atualizado automaticamente a cada uso.',
+    )
+    data_validade = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Data de validade',
+        help_text='Opcional. Deixe em branco para um voucher sem prazo de expiração.',
     )
     data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
 
@@ -63,12 +72,31 @@ class Voucher(models.Model):
         return f'{self.codigo_promocional} ({self.get_tipo_desconto_display()})'
 
     @property
+    def ilimitado(self):
+        """True se não há limite de usos (None ou 0)."""
+        return not self.limite_uso
+
+    @property
+    def expirado(self):
+        """True se há data de validade e ela já passou."""
+        return bool(self.data_validade and date.today() > self.data_validade)
+
+    @property
     def disponivel(self):
-        """True se o voucher está ativo e ainda tem disponíveis"""
-        return self.status_voucher == 'ativo' and self.usos_realizados < self.limite_uso
+        """True se o voucher pode ser aplicado: ativo, não expirado e com usos restantes."""
+        if self.status_voucher != 'ativo':
+            return False
+        if self.expirado:
+            return False
+        if self.ilimitado:
+            return True
+        return self.usos_realizados < self.limite_uso
 
     @property
     def usos_restantes(self):
+        """Quantidade de usos restantes; None se ilimitado."""
+        if self.ilimitado:
+            return None
         return max(0, self.limite_uso - self.usos_realizados)
 
     def calcular_desconto(self, valor_original):
@@ -82,17 +110,31 @@ class Voucher(models.Model):
             desconto = self.valor_desconto
         return min(desconto, valor_original)
 
+    def motivo_indisponivel(self):
+        """
+        Retorna a mensagem de erro caso o voucher não possa ser aplicado,
+        ou None se estiver válido para uso (US09).
+        """
+        if self.status_voucher != 'ativo' or self.expirado:
+            return 'Este código promocional é inválido ou já expirou.'
+        if not self.ilimitado and self.usos_realizados >= self.limite_uso:
+            return 'Este cupom já atingiu o limite máximo de utilizações.'
+        return None
+
 
 class Agendamento(models.Model):
     """
     Registro central de um atendimento — desde a solicitação até a conclusão
     """
     STATUS_CHOICES = [
-        ('aguardando',  'Aguardando'),
-        ('confirmado',  'Confirmado'),
-        ('concluido',   'Concluído'),
-        ('cancelado',   'Cancelado'),
+        ('aguardando',   'Aguardando'),
+        ('em_andamento', 'Em Andamento'),
+        ('confirmado',   'Confirmado'),
+        ('concluido',    'Concluído'),
+        ('cancelado',    'Cancelado'),
     ]
+    # Status que ocupam um horário na agenda (impedem novo agendamento no mesmo slot)
+    STATUS_ATIVOS = ['aguardando', 'em_andamento', 'confirmado']
     PAGAMENTO_CHOICES = [
         ('pix',      'PIX'),
         ('credito',  'Cartão de Crédito'),

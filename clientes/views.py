@@ -1,8 +1,9 @@
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Cliente
-from .forms import CPFForm, NovoCadastroForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Cliente, Anamnese
+from .forms import CPFForm, NovoCadastroForm, AnamneseForm
 
 
 class IdentificacaoView(View):
@@ -78,3 +79,88 @@ class IdentificacaoView(View):
                 'cpf_novo': cpf_formatado,
                 'mostrar_cadastro': True,
             })
+
+
+class AnamneseView(View):
+    """
+    US06 — Ficha de Saúde Capilar.
+    GET  → exibe formulário vazio (novo cliente) ou pré-preenchido (recorrente)
+    POST → cria ou atualiza a anamnese vinculada ao cliente da sessão
+    """
+
+    template_name = 'anamnese.html'
+
+    def _checar_sessao(self, request):
+        cliente_id = request.session.get('cliente_id')
+        if not cliente_id:
+            return None
+        try:
+            return Cliente.objects.get(pk=cliente_id)
+        except Cliente.DoesNotExist:
+            return None
+
+    def get(self, request):
+        cliente = self._checar_sessao(request)
+        if not cliente:
+            messages.warning(request, 'Identifique-se para acessar a ficha de saúde.')
+            return redirect('clientes:identificacao')
+
+        try:
+            anamnese = cliente.anamnese
+            form = AnamneseForm(instance=anamnese)
+        except Anamnese.DoesNotExist:
+            anamnese = None
+            form = AnamneseForm()
+
+        return render(request, self.template_name, {
+            'form': form,
+            'cliente': cliente,
+            'primeiro_nome': cliente.nome_completo.split()[0],
+            'anamnese_existente': anamnese is not None,
+        })
+
+    def post(self, request):
+        cliente = self._checar_sessao(request)
+        if not cliente:
+            return redirect('clientes:identificacao')
+
+        try:
+            anamnese = cliente.anamnese
+        except Anamnese.DoesNotExist:
+            anamnese = None
+
+        form = AnamneseForm(request.POST, instance=anamnese)
+        if form.is_valid():
+            ficha = form.save(commit=False)
+            ficha.cliente = cliente
+            ficha.save()
+            request.session.pop('agendamento_id', None)
+            messages.success(
+                request,
+                'Ficha salva com sucesso! Obrigado por nos ajudar a cuidar melhor de você.'
+            )
+            return redirect('servicos:home')
+
+        return render(request, self.template_name, {
+            'form': form,
+            'cliente': cliente,
+            'primeiro_nome': cliente.nome_completo.split()[0],
+            'anamnese_existente': anamnese is not None,
+        })
+
+
+class AnamneseDetailView(LoginRequiredMixin, View):
+    """
+    US11 / US07 — Visualização da ficha de anamnese pelo painel interno.
+    Acesso restrito a usuários logados (administrador ou terapeuta).
+    """
+    template_name = 'anamnese_detalhe.html'
+    login_url = '/login/'
+
+    def get(self, request, pk):
+        cliente = get_object_or_404(Cliente, pk=pk)
+        anamnese = getattr(cliente, 'anamnese', None)
+        return render(request, self.template_name, {
+            'cliente': cliente,
+            'anamnese': anamnese,
+        })

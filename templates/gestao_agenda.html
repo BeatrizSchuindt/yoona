@@ -1,0 +1,197 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Gestão de Agenda | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}">
+    <i class="fas fa-spa"></i> Terapias e Serviços
+  </a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}" class="ativo">
+    <i class="fas fa-calendar-alt"></i> Agendamentos
+  </a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}">
+    <i class="fas fa-calendar-times"></i> Bloqueios de Agenda
+  </a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Painel</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Gestão de Agenda</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Gestão de Agenda</h1>
+
+  <!-- Filtro de data -->
+  <form method="get" style="display:flex;align-items:center;gap:0.5rem;">
+    <label for="data" style="font-size:0.8rem;color:var(--texto-muted);">Data:</label>
+    <input type="date" id="data" name="data" value="{{ data_filtro }}"
+           onchange="this.form.submit()"
+           style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
+                  background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+  </form>
+</div>
+
+{% if not terapeutas %}
+  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
+              padding:0.85rem 1rem;margin-bottom:1rem;color:#9a3412;font-size:0.82rem;">
+    <i class="fas fa-info-circle" style="margin-right:0.4rem;"></i>
+    Nenhum terapeuta ativo cadastrado. Cadastre um terapeuta no
+    <a href="/admin_django/terapeutas/terapeuta/add/" style="color:#9a3412;text-decoration:underline;">admin do Django</a>
+    para poder vincular e concluir atendimentos.
+  </div>
+{% endif %}
+
+<!-- Forms por linha (HTML5 form attribute associa os campos da tabela) -->
+{% for ag in agendamentos %}
+  {% if ag.status != 'concluido' %}
+    <form id="form-ag-{{ ag.pk }}" method="post"
+          action="{% url 'agendamentos:atualizar_agendamento' ag.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="data_filtro" value="{{ data_filtro }}">
+    </form>
+  {% endif %}
+{% endfor %}
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-calendar-day" style="color:var(--gold);margin-right:0.5rem;"></i>Atendimentos do dia</h3>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Serviço</th>
+          <th>Horário</th>
+          <th>Terapeuta</th>
+          <th>Valor</th>
+          <th>Pagamento</th>
+          <th>Status</th>
+          <th>Comissão</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ag in agendamentos %}
+          <tr>
+            <!-- Cliente -->
+            <td>
+              <strong>{{ ag.cliente.nome_completo }}</strong><br>
+              <span style="font-size:0.72rem;color:var(--texto-muted);">{{ ag.cliente.cpf }}</span>
+            </td>
+
+            <!-- Serviço -->
+            <td>{{ ag.servico.nome }}</td>
+
+            <!-- Horário -->
+            <td>{{ ag.horario_agendamento|time:"H:i" }}</td>
+
+            <!-- Terapeuta -->
+            <td>
+              {% if ag.status == 'concluido' %}
+                {{ ag.terapeuta.nome_terapeuta|default:"—" }}
+              {% else %}
+                <select name="terapeuta" form="form-ag-{{ ag.pk }}"
+                        style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
+                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               font-size:0.78rem;max-width:150px;">
+                  <option value="">— Selecione —</option>
+                  {% for t in terapeutas %}
+                    <option value="{{ t.pk }}" {% if ag.terapeuta_id == t.pk %}selected{% endif %}>
+                      {{ t.nome_terapeuta }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+            </td>
+
+            <!-- Valor -->
+            <td>R$ {{ ag.valor_final|default:ag.valor_base }}</td>
+
+            <!-- Pagamento -->
+            <td>
+              <span style="font-size:0.72rem;padding:0.2rem 0.55rem;border-radius:20px;
+                           background:rgba(201,168,76,0.12);color:#92610a;border:1px solid rgba(201,168,76,0.3);">
+                {{ ag.get_metodo_pagamento_display }}
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if ag.status == 'concluido' %}
+                <span style="font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:20px;
+                             background:rgba(34,197,94,0.12);color:#15803d;border:1px solid rgba(34,197,94,0.3);">
+                  <i class="fas fa-lock" style="font-size:0.6rem;margin-right:0.2rem;"></i> Concluído
+                </span>
+              {% else %}
+                <select name="status" form="form-ag-{{ ag.pk }}"
+                        style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
+                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               font-size:0.78rem;">
+                  {% for valor, label in status_choices %}
+                    <option value="{{ valor }}" {% if ag.status == valor %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+            </td>
+
+            <!-- Comissão -->
+            <td>
+              {% if ag.status == 'concluido' %}
+                <strong style="color:#15803d;">R$ {{ ag.comissao.valor_calculado }}</strong>
+              {% else %}
+                <span style="font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:20px;
+                             background:rgba(148,163,184,0.15);color:#64748b;border:1px solid rgba(148,163,184,0.35);">
+                  Pendente
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Ações -->
+            <td>
+              <div style="display:flex;gap:0.4rem;align-items:center;">
+                {% if ag.status != 'concluido' %}
+                  <button type="submit" form="form-ag-{{ ag.pk }}"
+                          class="btn-admin btn-admin-primario btn-admin-sm">
+                    <i class="fas fa-save"></i> Salvar
+                  </button>
+                {% endif %}
+                <a href="{% url 'clientes:anamnese_detalhe' ag.cliente.pk %}"
+                   class="btn-admin btn-admin-outline btn-admin-sm" title="Ver ficha de anamnese">
+                  <i class="fas fa-notes-medical"></i> Anamnese
+                </a>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="9" class="tabela-vazia">
+              <i class="fas fa-calendar-day" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Nenhum agendamento para esta data.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

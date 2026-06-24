@@ -1,0 +1,124 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Gestão de Vouchers | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}" class="ativo"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Painel</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Vouchers e Promoções</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Gestão de Vouchers e Promoções</h1>
+  <a href="{% url 'agendamentos:novo_voucher' %}" class="btn-admin btn-admin-primario">
+    <i class="fas fa-plus"></i> Novo Voucher
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-ticket-alt" style="color:var(--gold);margin-right:0.5rem;"></i>Cupons cadastrados</h3>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Desconto</th>
+          <th>Utilização</th>
+          <th>Validade</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vouchers %}
+          <tr>
+            <td><strong>{{ v.codigo_promocional }}</strong></td>
+            <td>
+              {% if v.tipo_desconto == 'percentual' %}
+                {{ v.valor_desconto|floatformat:0 }}%
+              {% else %}
+                R$ {{ v.valor_desconto }}
+              {% endif %}
+            </td>
+            <td>
+              {{ v.usos_realizados }}/{% if v.ilimitado %}<span title="Ilimitado">&#8734;</span>{% else %}{{ v.limite_uso }}{% endif %}
+            </td>
+            <td>
+              {% if v.data_validade %}
+                {{ v.data_validade|date:"d/m/Y" }}
+                {% if v.expirado %}
+                  <span style="font-size:0.68rem;color:#dc2626;">(expirado)</span>
+                {% endif %}
+              {% else %}
+                <span style="color:var(--texto-muted);">Sem limite</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if v.status_voucher == 'ativo' %}
+                <span class="badge badge-ativo">Ativo</span>
+              {% else %}
+                <span class="badge badge-inativo">Inativo</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="btn-grupo">
+                <a href="{% url 'agendamentos:editar_voucher' v.pk %}" class="btn-admin btn-admin-outline btn-admin-sm">
+                  <i class="fas fa-pen"></i> Editar
+                </a>
+                <form method="post" action="{% url 'agendamentos:toggle_voucher' v.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  {% if v.status_voucher == 'ativo' %}
+                    <button type="submit" class="btn-admin btn-admin-perigo btn-admin-sm">
+                      <i class="fas fa-ban"></i> Inativar
+                    </button>
+                  {% else %}
+                    <button type="submit" class="btn-admin btn-admin-primario btn-admin-sm">
+                      <i class="fas fa-check"></i> Ativar
+                    </button>
+                  {% endif %}
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="tabela-vazia">
+              <i class="fas fa-ticket-alt" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Nenhum voucher cadastrado ainda.
+              <br>
+              <a href="{% url 'agendamentos:novo_voucher' %}" style="margin-top:0.5rem;display:inline-block;">
+                Cadastrar o primeiro voucher
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

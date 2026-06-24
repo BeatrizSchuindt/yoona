@@ -1,0 +1,138 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Comissões | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}" class="ativo"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Painel</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Comissões</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Relatório de Comissões</h1>
+</div>
+
+<!-- ── Filtros ──────────────────────────────────────────────────────────── -->
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="card-body">
+    <form method="get" style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;">
+
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label for="terapeuta" style="font-size:0.78rem;color:var(--texto-muted);">Terapeuta</label>
+        <select name="terapeuta" id="terapeuta"
+                style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
+                       background:var(--superficie);color:var(--texto);font-size:0.85rem;min-width:180px;">
+          <option value="">Todos</option>
+          {% for t in terapeutas %}
+            <option value="{{ t.pk }}" {% if terapeuta_sel == t.pk|stringformat:"s" %}selected{% endif %}>
+              {{ t.nome_terapeuta }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label for="data_inicio" style="font-size:0.78rem;color:var(--texto-muted);">De</label>
+        <input type="date" name="data_inicio" id="data_inicio" value="{{ data_inicio }}"
+               style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
+                      background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <label for="data_fim" style="font-size:0.78rem;color:var(--texto-muted);">Até</label>
+        <input type="date" name="data_fim" id="data_fim" value="{{ data_fim }}"
+               style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
+                      background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+      </div>
+
+      <button type="submit" class="btn-admin btn-admin-primario">
+        <i class="fas fa-filter"></i> Filtrar
+      </button>
+      <a href="{% url 'agendamentos:relatorio_comissoes' %}" class="btn-admin btn-admin-outline">
+        Limpar
+      </a>
+    </form>
+  </div>
+</div>
+
+<!-- ── Resumo do período ────────────────────────────────────────────────── -->
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.25rem;max-width:520px;">
+  <div class="card" style="padding:1.1rem 1.3rem;">
+    <span style="font-size:0.75rem;color:var(--texto-muted);display:block;margin-bottom:0.3rem;">
+      Total em comissões
+    </span>
+    <strong style="font-size:1.5rem;color:#15803d;">R$ {{ total }}</strong>
+  </div>
+  <div class="card" style="padding:1.1rem 1.3rem;">
+    <span style="font-size:0.75rem;color:var(--texto-muted);display:block;margin-bottom:0.3rem;">
+      Atendimentos
+    </span>
+    <strong style="font-size:1.5rem;color:var(--texto);">{{ quantidade }}</strong>
+  </div>
+</div>
+
+<!-- ── Tabela ───────────────────────────────────────────────────────────── -->
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-file-invoice-dollar" style="color:var(--gold);margin-right:0.5rem;"></i>Registros de comissão</h3>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Registrado em</th>
+          <th>Terapeuta</th>
+          <th>Cliente</th>
+          <th>Serviço</th>
+          <th>Atendimento</th>
+          <th>Valor base</th>
+          <th>Comissão</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in comissoes %}
+          <tr>
+            <td>{{ c.data_registro|date:"d/m/Y H:i" }}</td>
+            <td><strong>{{ c.terapeuta.nome_terapeuta }}</strong></td>
+            <td>{{ c.agendamento.cliente.nome_completo }}</td>
+            <td>{{ c.agendamento.servico.nome }}</td>
+            <td style="color:var(--texto-muted);">{{ c.agendamento.data_agendamento|date:"d/m/Y" }}</td>
+            <td>R$ {{ c.agendamento.valor_final }}</td>
+            <td><strong style="color:#15803d;">R$ {{ c.valor_calculado }}</strong></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="tabela-vazia">
+              <i class="fas fa-file-invoice-dollar" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Nenhuma comissão registrada para os filtros selecionados.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

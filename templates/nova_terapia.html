@@ -11,9 +11,10 @@
   <a href="{% url 'servicos:painel_admin' %}" class="ativo">
     <i class="fas fa-spa"></i> Terapias e Serviços
   </a>
-  <a href="#"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
-  <a href="#"><i class="fas fa-ticket-alt"></i> Vouchers</a>
-  <a href="#"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
 </div>
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
