@@ -22,7 +22,7 @@
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
   <span class="sidebar-nav-rotulo">Cadastros</span>
-  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
   <a href="#"><i class="fas fa-users"></i> Clientes</a>
 </div>
 {% endblock %}
@@ -52,8 +52,8 @@
   <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
               padding:0.85rem 1rem;margin-bottom:1rem;color:#9a3412;font-size:0.82rem;">
     <i class="fas fa-info-circle" style="margin-right:0.4rem;"></i>
-    Nenhum terapeuta ativo cadastrado. Cadastre um terapeuta no
-    <a href="/admin_django/terapeutas/terapeuta/add/" style="color:#9a3412;text-decoration:underline;">admin do Django</a>
+    Nenhum terapeuta ativo cadastrado.
+    <a href="{% url 'terapeutas:novo' %}" style="color:#9a3412;text-decoration:underline;">Cadastre um terapeuta</a>
     para poder vincular e concluir atendimentos.
   </div>
 {% endif %}
