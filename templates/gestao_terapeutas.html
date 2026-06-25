@@ -1,0 +1,103 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Terapeutas | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="{% url 'terapeutas:lista' %}" class="ativo"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'servicos:painel_admin' %}">Painel</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Terapeutas</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Gestão de Terapeutas</h1>
+  <a href="{% url 'terapeutas:novo' %}" class="btn-admin btn-admin-primario">
+    <i class="fas fa-plus"></i> Novo terapeuta
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-user-md" style="color:var(--gold);margin-right:0.5rem;"></i>Terapeutas cadastrados</h3>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Nome profissional</th>
+          <th>Usuário (login)</th>
+          <th>Comissão</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in terapeutas %}
+          <tr>
+            <td><strong>{{ t.nome_terapeuta }}</strong></td>
+            <td style="color:var(--texto-muted);">{{ t.usuario.username }}</td>
+            <td>{{ t.percentual_comissao }}%</td>
+            <td>
+              <span class="badge {% if t.ativo %}badge-ativo{% else %}badge-inativo{% endif %}">
+                {{ t.ativo|yesno:"Ativo,Inativo" }}
+              </span>
+            </td>
+            <td>
+              <div class="btn-grupo">
+                <a href="{% url 'terapeutas:editar' t.pk %}" class="btn-admin btn-admin-outline btn-admin-sm">
+                  <i class="fas fa-pen"></i> Editar
+                </a>
+                <form method="post" action="{% url 'terapeutas:toggle' t.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  {% if t.ativo %}
+                    <button type="submit" class="btn-admin btn-admin-perigo btn-admin-sm">
+                      <i class="fas fa-toggle-off"></i> Inativar
+                    </button>
+                  {% else %}
+                    <button type="submit" class="btn-admin btn-admin-primario btn-admin-sm">
+                      <i class="fas fa-toggle-on"></i> Ativar
+                    </button>
+                  {% endif %}
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="tabela-vazia">
+              <i class="fas fa-user-md" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Nenhum terapeuta cadastrado ainda.
+              <br>
+              <a href="{% url 'terapeutas:novo' %}" style="margin-top:0.5rem;display:inline-block;">
+                Cadastrar o primeiro terapeuta
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

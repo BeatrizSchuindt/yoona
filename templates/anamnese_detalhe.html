@@ -6,14 +6,24 @@
 
 {% block sidebar_nav %}
 <div class="sidebar-nav-grupo">
-  <a href="{% url 'agendamentos:gestao_agenda' %}">
-    <i class="fas fa-arrow-left"></i> Voltar à agenda
-  </a>
+  {% if user.is_staff %}
+    <a href="{% url 'agendamentos:gestao_agenda' %}">
+      <i class="fas fa-arrow-left"></i> Voltar à agenda
+    </a>
+  {% else %}
+    <a href="{% url 'painel_terapeuta' %}">
+      <i class="fas fa-arrow-left"></i> Voltar à agenda
+    </a>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block breadcrumb %}
-  <a href="{% url 'agendamentos:gestao_agenda' %}">Gestão de Agenda</a>
+  {% if user.is_staff %}
+    <a href="{% url 'agendamentos:gestao_agenda' %}">Gestão de Agenda</a>
+  {% else %}
+    <a href="{% url 'painel_terapeuta' %}">Minha Agenda</a>
+  {% endif %}
   <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
   <span class="bc-atual">Ficha de Anamnese</span>
 {% endblock %}
@@ -35,7 +45,7 @@
     <div>
       <div style="font-weight:600;font-size:1rem;color:var(--texto);">{{ cliente.nome_completo }}</div>
       <div style="font-size:0.8rem;color:var(--texto-muted);">
-        CPF: {{ cliente.cpf }} &nbsp;·&nbsp; {{ cliente.telefone }}
+        CPF: {{ cliente.cpf_mascarado }} &nbsp;·&nbsp; {{ cliente.telefone }}
       </div>
     </div>
   </div>
@@ -52,22 +62,22 @@
     <div class="card-body">
       <div style="display:grid;gap:1.25rem;">
 
-        <!-- Alergias -->
-        <div class="an-det-item">
+        <!-- Alergias (risco à saúde) -->
+        <div class="an-det-item{% if anamnese.tem_alergias %} an-det-risco{% endif %}">
           <div class="an-det-label">Alergias</div>
           {% if anamnese.tem_alergias %}
-            <div class="an-det-sim"><i class="fas fa-exclamation-circle"></i> Sim</div>
+            <div class="an-det-alerta"><i class="fas fa-exclamation-triangle"></i> Atenção — Sim</div>
             <p class="an-det-texto">{{ anamnese.alergias_detalhes }}</p>
           {% else %}
             <div class="an-det-nao">Não relatadas</div>
           {% endif %}
         </div>
 
-        <!-- Sensibilidade -->
-        <div class="an-det-item">
+        <!-- Sensibilidade (risco à saúde) -->
+        <div class="an-det-item{% if anamnese.tem_sensibilidade %} an-det-risco{% endif %}">
           <div class="an-det-label">Sensibilidade no couro cabeludo</div>
           {% if anamnese.tem_sensibilidade %}
-            <div class="an-det-sim"><i class="fas fa-exclamation-circle"></i> Sim</div>
+            <div class="an-det-alerta"><i class="fas fa-exclamation-triangle"></i> Atenção — Sim</div>
             <p class="an-det-texto">{{ anamnese.sensibilidade_detalhes }}</p>
           {% else %}
             <div class="an-det-nao">Não relatada</div>
@@ -120,9 +130,16 @@
   </div>
 {% else %}
   <div class="card">
-    <div class="card-body" style="text-align:center;padding:2.5rem;color:var(--texto-muted);">
-      <i class="fas fa-folder-open" style="display:block;font-size:2rem;margin-bottom:0.75rem;color:var(--borda);"></i>
-      Este cliente ainda não preencheu a ficha de anamnese.
+    <div class="card-body" style="padding:1.5rem;">
+      <div style="background:rgba(220,53,69,0.08);border:1px solid rgba(220,53,69,0.35);
+                  border-radius:8px;padding:1.25rem 1.5rem;display:flex;gap:0.85rem;align-items:flex-start;">
+        <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:1.3rem;margin-top:0.1rem;flex-shrink:0;"></i>
+        <div style="color:var(--texto);font-size:0.9rem;line-height:1.55;">
+          <strong style="color:#ef4444;">Atenção:</strong>
+          Este cliente ainda não preencheu a Ficha de Anamnese Digital.
+          Solicite o preenchimento antes de iniciar o procedimento.
+        </div>
+      </div>
     </div>
   </div>
 {% endif %}
@@ -136,6 +153,17 @@
   }
   .an-det-sim { font-size:0.85rem; font-weight:600; color:#b45309; }
   .an-det-nao { font-size:0.85rem; color:var(--texto-muted); }
+  /* Alerta de risco à saúde (alergias / sensibilidade) */
+  .an-det-risco {
+    background: rgba(220,53,69,0.08);
+    border: 1px solid rgba(220,53,69,0.35);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+  }
+  .an-det-alerta {
+    font-size: 0.85rem; font-weight: 700; color: #ef4444;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
   .an-det-texto {
     font-size:0.88rem; color:var(--texto); margin-top:0.3rem;
     line-height:1.5; white-space:pre-line;

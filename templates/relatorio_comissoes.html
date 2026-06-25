@@ -16,8 +16,8 @@
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
   <span class="sidebar-nav-rotulo">Cadastros</span>
-  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
-  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}"><i class="fas fa-users"></i> Clientes</a>
 </div>
 {% endblock %}
 
@@ -42,7 +42,7 @@
         <label for="terapeuta" style="font-size:0.78rem;color:var(--texto-muted);">Terapeuta</label>
         <select name="terapeuta" id="terapeuta"
                 style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
-                       background:var(--superficie);color:var(--texto);font-size:0.85rem;min-width:180px;">
+                       background:var(--surface2);color:var(--texto);font-size:0.85rem;min-width:180px;">
           <option value="">Todos</option>
           {% for t in terapeutas %}
             <option value="{{ t.pk }}" {% if terapeuta_sel == t.pk|stringformat:"s" %}selected{% endif %}>
@@ -56,14 +56,14 @@
         <label for="data_inicio" style="font-size:0.78rem;color:var(--texto-muted);">De</label>
         <input type="date" name="data_inicio" id="data_inicio" value="{{ data_inicio }}"
                style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
-                      background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+                      background:var(--surface2);color:var(--texto);font-size:0.85rem;">
       </div>
 
       <div style="display:flex;flex-direction:column;gap:0.3rem;">
         <label for="data_fim" style="font-size:0.78rem;color:var(--texto-muted);">Até</label>
         <input type="date" name="data_fim" id="data_fim" value="{{ data_fim }}"
                style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
-                      background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+                      background:var(--surface2);color:var(--texto);font-size:0.85rem;">
       </div>
 
       <button type="submit" class="btn-admin btn-admin-primario">

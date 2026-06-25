@@ -87,7 +87,8 @@
       z-index: 200;
     }
     .perfil-menu.aberto { display: block; }
-    .perfil-menu li a {
+    .perfil-menu li a,
+    .perfil-menu li button {
       display: flex;
       align-items: center;
       gap: 0.6rem;
@@ -96,10 +97,21 @@
       color: var(--texto-muted);
       transition: background 0.15s, color 0.15s;
       white-space: nowrap;
+      /* reset para o <button> ficar igual ao link */
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
     }
-    .perfil-menu li a i { width: 14px; text-align: center; }
-    .perfil-menu li a:hover { background: rgba(255,255,255,0.04); color: var(--texto); }
-    .perfil-menu li a.perfil-sair:hover { color: #ef9a9a; }
+    .perfil-menu li form { margin: 0; }
+    .perfil-menu li a i,
+    .perfil-menu li button i { width: 14px; text-align: center; }
+    .perfil-menu li a:hover,
+    .perfil-menu li button:hover { background: rgba(255,255,255,0.04); color: var(--texto); }
+    .perfil-menu li a.perfil-sair:hover,
+    .perfil-menu li button.perfil-sair:hover { color: #ef9a9a; }
     .perfil-menu-sep {
       height: 1px;
       background: var(--borda-sutil);
@@ -142,12 +154,6 @@
       {% endblock %}
     </nav>
 
-    <div class="sidebar-footer">
-      <a href="{% url 'logout' %}">
-        <i class="fas fa-sign-out-alt"></i> Sair do sistema
-      </a>
-    </div>
-
   </aside>
 
   <!-- OVERLAY MOBILE -->
@@ -186,9 +192,12 @@
             </li>
             <li class="perfil-menu-sep" role="none"></li>
             <li role="none">
-              <a href="{% url 'logout' %}" role="menuitem" class="perfil-sair">
-                <i class="fas fa-sign-out-alt"></i> Sair
-              </a>
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" role="menuitem" class="perfil-sair">
+                  <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+              </form>
             </li>
           </ul>
         </div>

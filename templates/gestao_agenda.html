@@ -22,8 +22,8 @@
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
   <span class="sidebar-nav-rotulo">Cadastros</span>
-  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
-  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}"><i class="fas fa-users"></i> Clientes</a>
 </div>
 {% endblock %}
 
@@ -44,7 +44,7 @@
     <input type="date" id="data" name="data" value="{{ data_filtro }}"
            onchange="this.form.submit()"
            style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
-                  background:var(--superficie);color:var(--texto);font-size:0.85rem;">
+                  background:var(--surface2);color:var(--texto);font-size:0.85rem;">
   </form>
 </div>
 
@@ -52,8 +52,8 @@
   <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
               padding:0.85rem 1rem;margin-bottom:1rem;color:#9a3412;font-size:0.82rem;">
     <i class="fas fa-info-circle" style="margin-right:0.4rem;"></i>
-    Nenhum terapeuta ativo cadastrado. Cadastre um terapeuta no
-    <a href="/admin_django/terapeutas/terapeuta/add/" style="color:#9a3412;text-decoration:underline;">admin do Django</a>
+    Nenhum terapeuta ativo cadastrado.
+    <a href="{% url 'terapeutas:novo' %}" style="color:#9a3412;text-decoration:underline;">Cadastre um terapeuta</a>
     para poder vincular e concluir atendimentos.
   </div>
 {% endif %}
@@ -111,7 +111,7 @@
               {% else %}
                 <select name="terapeuta" form="form-ag-{{ ag.pk }}"
                         style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
-                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               border-radius:6px;background:var(--surface2);color:var(--texto);
                                font-size:0.78rem;max-width:150px;">
                   <option value="">— Selecione —</option>
                   {% for t in terapeutas %}
@@ -144,7 +144,7 @@
               {% else %}
                 <select name="status" form="form-ag-{{ ag.pk }}"
                         style="padding:0.35rem 0.5rem;border:1px solid var(--borda-sutil);
-                               border-radius:6px;background:var(--superficie);color:var(--texto);
+                               border-radius:6px;background:var(--surface2);color:var(--texto);
                                font-size:0.78rem;">
                   {% for valor, label in status_choices %}
                     <option value="{{ valor }}" {% if ag.status == valor %}selected{% endif %}>{{ label }}</option>
@@ -175,8 +175,9 @@
                   </button>
                 {% endif %}
                 <a href="{% url 'clientes:anamnese_detalhe' ag.cliente.pk %}"
+                   target="_blank" rel="noopener"
                    class="btn-admin btn-admin-outline btn-admin-sm" title="Ver ficha de anamnese">
-                  <i class="fas fa-notes-medical"></i> Anamnese
+                  <i class="fas fa-notes-medical"></i> Ver Anamnese
                 </a>
               </div>
             </td>

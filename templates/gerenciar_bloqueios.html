@@ -22,8 +22,8 @@
 <hr class="sidebar-sep">
 <div class="sidebar-nav-grupo">
   <span class="sidebar-nav-rotulo">Cadastros</span>
-  <a href="#"><i class="fas fa-user-md"></i> Terapeutas</a>
-  <a href="#"><i class="fas fa-users"></i> Clientes</a>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}"><i class="fas fa-users"></i> Clientes</a>
 </div>
 {% endblock %}
 

@@ -8,30 +8,42 @@
 {% block sidebar_nav %}
 <div class="sidebar-nav-grupo">
   <span class="sidebar-nav-rotulo">Meu espaço</span>
-  <a href="#" class="ativo"><i class="fas fa-calendar-day"></i> Agenda do Dia</a>
-  <a href="#anamneses"><i class="fas fa-notes-medical"></i> Fichas de Anamnese</a>
+  <a href="{% url 'painel_terapeuta' %}" class="ativo"><i class="fas fa-calendar-day"></i> Agenda do Dia</a>
 </div>
 {% endblock %}
 
 {% block breadcrumb %}
-  <span class="bc-atual">Agenda do Dia</span>
+  <span class="bc-atual">Minha Agenda</span>
 {% endblock %}
 
 {% block content %}
 
 <div class="page-header">
   <h1>Minha Agenda</h1>
-  <input type="date"
-         id="filtro-data"
-         style="background:var(--surface2);color:var(--texto);border:1px solid var(--borda-sutil);padding:0.42rem 0.75rem;border-radius:var(--radius);font-size:0.8rem;font-family:inherit;"
-         aria-label="Filtrar por data" />
+
+  <!-- Filtro de data -->
+  <form method="get" style="display:flex;align-items:center;gap:0.5rem;">
+    <label for="data" style="font-size:0.8rem;color:var(--texto-muted);">Data:</label>
+    <input type="date" id="data" name="data" value="{{ data_filtro }}"
+           onchange="this.form.submit()"
+           style="padding:0.45rem 0.7rem;border:1px solid var(--borda-sutil);border-radius:8px;
+                  background:var(--surface2);color:var(--texto);font-size:0.85rem;">
+  </form>
 </div>
 
-<!-- Próximos atendimentos -->
-<div class="card" id="agenda">
-  <div class="card-header">
-    <h3><i class="fas fa-calendar-day" style="color:var(--gold);margin-right:0.5rem;"></i>Próximos Atendimentos</h3>
+{% if not terapeuta %}
+  <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;
+              padding:0.85rem 1rem;margin-bottom:1rem;color:#9a3412;font-size:0.82rem;">
+    <i class="fas fa-info-circle" style="margin-right:0.4rem;"></i>
+    Seu usuário não está vinculado a um perfil de terapeuta. Contate o administrador.
   </div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-calendar-day" style="color:var(--gold);margin-right:0.5rem;"></i>Atendimentos do dia</h3>
+  </div>
+
   <div class="table-wrapper">
     <table class="tabela">
       <thead>
@@ -44,91 +56,40 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td><strong>09:00</strong></td>
-          <td>Mariana Costa</td>
-          <td>Detox Capilar</td>
-          <td><span class="badge badge-confirmado">Confirmado</span></td>
-          <td>
-            <a href="#anamneses" class="btn-admin btn-admin-primario btn-admin-sm">
-              <i class="fas fa-notes-medical"></i> Ver ficha
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td><strong>10:30</strong></td>
-          <td>Carlos Mendes</td>
-          <td>Terapia Relaxante VIP</td>
-          <td><span class="badge badge-aguardando">Aguardando</span></td>
-          <td>
-            <div class="btn-grupo">
-              <a href="#" class="btn-admin btn-admin-outline btn-admin-sm">
-                <i class="fas fa-check"></i> Aprovar
+        {% for ag in agendamentos %}
+          <tr>
+            <td><strong>{{ ag.horario_agendamento|time:"H:i" }}</strong></td>
+            <td>
+              <strong>{{ ag.cliente.nome_completo }}</strong><br>
+              <span style="font-size:0.72rem;color:var(--texto-muted);">{{ ag.cliente.cpf_mascarado }}</span>
+            </td>
+            <td>{{ ag.servico.nome }}</td>
+            <td>
+              {% if ag.status == 'concluido' %}
+                <span class="badge badge-ativo">Concluído</span>
+              {% else %}
+                <span class="badge badge-aguardando">{{ ag.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'clientes:anamnese_detalhe' ag.cliente.pk %}"
+                 target="_blank" rel="noopener"
+                 class="btn-admin btn-admin-primario btn-admin-sm" title="Ver ficha de anamnese">
+                <i class="fas fa-notes-medical"></i> Ver Anamnese
               </a>
-              <a href="#anamneses" class="btn-admin btn-admin-primario btn-admin-sm">
-                <i class="fas fa-notes-medical"></i> Ficha
-              </a>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="tabela-vazia">
+              <i class="fas fa-calendar-day" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Nenhum atendimento vinculado a você nesta data.
+            </td>
+          </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- Fichas de Anamnese -->
-<div class="card" id="anamneses">
-  <div class="card-header">
-    <h3><i class="fas fa-notes-medical" style="color:var(--gold);margin-right:0.5rem;"></i>Fichas de Anamnese</h3>
-  </div>
-  <div class="card-body">
-    <p style="color:var(--texto-muted);font-size:0.82rem;margin-bottom:1.25rem;">
-      Consulte o histórico do cliente antes de iniciar o procedimento.
-    </p>
-
-    <form method="get" action="#" style="margin-bottom:1.5rem;">
-      <div style="display:flex;gap:0.6rem;max-width:480px;">
-        <input type="text"
-               name="busca"
-               placeholder="Buscar cliente por nome ou CPF..."
-               style="flex:1;background:var(--surface2);border:1px solid var(--borda-sutil);color:var(--texto);padding:0.55rem 0.85rem;border-radius:var(--radius);font-family:inherit;font-size:0.82rem;" />
-        <button type="submit" class="btn-admin btn-admin-primario">
-          <i class="fas fa-search"></i> Buscar
-        </button>
-      </div>
-    </form>
-
-    <!-- Card da anamnese -->
-    <div style="background:var(--surface2);border:1px solid var(--borda-sutil);border-left:3px solid var(--gold);border-radius:var(--radius);padding:1.25rem;">
-      <p style="font-size:0.78rem;color:var(--texto-muted);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.1em;">
-        Paciente: <strong style="color:var(--texto);">Mariana Costa</strong>
-      </p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1.25rem;">
-        <div>
-          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Alergias</div>
-          <p style="margin:0;font-size:0.82rem;">Nenhuma relatada.</p>
-        </div>
-        <div>
-          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Sensibilidades</div>
-          <p style="margin:0;font-size:0.82rem;color:#ffe082;">Couro cabeludo sensível a atrito forte.</p>
-        </div>
-        <div>
-          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Procedimentos Anteriores</div>
-          <p style="margin:0;font-size:0.82rem;">Descoloração há 3 meses.</p>
-        </div>
-        <div>
-          <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--texto-muted);margin-bottom:0.3rem;">Preferências</div>
-          <p style="margin:0;font-size:0.82rem;">Massagem com pressão suave; prefere óleos cítricos.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  document.getElementById('filtro-data').valueAsDate = new Date();
-</script>
 {% endblock %}

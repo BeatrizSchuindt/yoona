@@ -1,0 +1,116 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Editar Terapeuta | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="{% url 'terapeutas:lista' %}" class="ativo"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'terapeutas:lista' %}">Terapeutas</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Editar Terapeuta</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Editar Terapeuta: <em style="color:var(--gold);font-style:normal;">{{ object.nome_terapeuta }}</em></h1>
+  <a href="{% url 'terapeutas:lista' %}" class="btn-admin btn-admin-outline">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card" style="max-width:620px;">
+  <div class="card-header">
+    <h3><i class="fas fa-user-md" style="color:var(--gold);margin-right:0.5rem;"></i>Dados do terapeuta</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-admin">
+
+        <!-- Nome profissional -->
+        <div class="form-group">
+          <label for="{{ form.nome_terapeuta.id_for_label }}">Nome profissional *</label>
+          {{ form.nome_terapeuta }}
+          {% for erro in form.nome_terapeuta.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+        </div>
+
+        <!-- Login (somente leitura) + E-mail -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>
+              Nome de usuário (login)
+              <i class="fas fa-lock" style="font-size:0.7rem;color:var(--texto-muted);margin-left:0.2rem;" title="O login não pode ser alterado"></i>
+            </label>
+            <div style="padding:0.5rem 0.75rem;background:var(--surface2);border:1px solid var(--borda-sutil);
+                        border-radius:8px;color:var(--texto-muted);font-size:0.88rem;cursor:not-allowed;
+                        display:flex;align-items:center;gap:0.5rem;">
+              <i class="fas fa-lock" style="font-size:0.7rem;opacity:0.6;"></i>
+              {{ object.usuario.username }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">E-mail</label>
+            {{ form.email }}
+            {% for erro in form.email.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <!-- Nova senha (opcional) -->
+        <div class="form-group">
+          <label for="{{ form.nova_senha.id_for_label }}">Nova senha</label>
+          {{ form.nova_senha }}
+          {% for erro in form.nova_senha.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          <span style="font-size:0.7rem;color:var(--texto-muted);margin-top:0.25rem;display:block;">
+            Deixe em branco para manter a senha atual.
+          </span>
+        </div>
+
+        <!-- Percentual + Status -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.percentual_comissao.id_for_label }}">Percentual de comissão (%) *</label>
+            {{ form.percentual_comissao }}
+            {% for erro in form.percentual_comissao.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.ativo.id_for_label }}">Ativo</label>
+            {{ form.ativo }}
+            {% for erro in form.ativo.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="form-erros" style="margin-top:1rem;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-acoes">
+          <a href="{% url 'terapeutas:lista' %}" class="btn-admin btn-admin-outline">Cancelar</a>
+          <button type="submit" class="btn-admin btn-admin-primario btn-admin-lg">
+            <i class="fas fa-save"></i> Salvar alterações
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
