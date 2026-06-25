@@ -151,14 +151,33 @@ class AnamneseView(View):
 
 class AnamneseDetailView(LoginRequiredMixin, View):
     """
-    US11 / US07 — Visualização da ficha de anamnese pelo painel interno.
-    Acesso restrito a usuários logados (administrador ou terapeuta).
+    US07 — Consulta da ficha de anamnese pelo painel interno (modo leitura).
+    Acesso (LGPD):
+      · Administrador (is_staff) → todas as fichas.
+      · Terapeuta → apenas clientes com agendamento vinculado à sua agenda.
     """
     template_name = 'anamnese_detalhe.html'
     login_url = '/login/'
 
     def get(self, request, pk):
         cliente = get_object_or_404(Cliente, pk=pk)
+        user = request.user
+
+        # Controle de acesso por vínculo (LGPD) — admin é exceção
+        if not (user.is_staff or user.is_superuser):
+            from agendamentos.models import Agendamento
+            terapeuta = getattr(user, 'terapeuta', None)
+            vinculado = terapeuta is not None and Agendamento.objects.filter(
+                cliente=cliente, terapeuta=terapeuta
+            ).exists()
+            if not vinculado:
+                messages.error(
+                    request,
+                    'Acesso Negado. Em conformidade com a LGPD, você só tem permissão '
+                    'para visualizar os dados clínicos dos pacientes vinculados à sua agenda.'
+                )
+                return redirect('painel_terapeuta')
+
         anamnese = getattr(cliente, 'anamnese', None)
         return render(request, self.template_name, {
             'cliente': cliente,

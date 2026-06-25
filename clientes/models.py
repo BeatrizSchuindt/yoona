@@ -29,6 +29,14 @@ class Cliente(models.Model):
         """Retorna CPF somente com dígitos"""
         return ''.join(filter(str.isdigit, self.cpf))
 
+    @property
+    def cpf_mascarado(self):
+        """CPF mascarado para exibição (LGPD). Ex: ***.434.671-**"""
+        d = self.cpf_numeros
+        if len(d) != 11:
+            return self.cpf
+        return f'***.{d[3:6]}.{d[6:9]}-**'
+
 
 class Anamnese(models.Model):
     """

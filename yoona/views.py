@@ -24,4 +24,29 @@ def painel_admin(request):
 
 @login_required # Terapeutas acessam
 def painel_terapeuta(request):
-    return render(request, 'painel_terapeuta.html')
+    """Agenda diária do terapeuta logado (US07) — somente seus atendimentos."""
+    from datetime import date
+    from agendamentos.models import Agendamento
+
+    terapeuta = getattr(request.user, 'terapeuta', None)
+
+    data_str = request.GET.get('data', date.today().isoformat())
+    try:
+        data_filtro = date.fromisoformat(data_str)
+    except ValueError:
+        data_filtro = date.today()
+
+    agendamentos = []
+    if terapeuta:
+        agendamentos = (
+            Agendamento.objects
+            .filter(terapeuta=terapeuta, data_agendamento=data_filtro)
+            .select_related('cliente', 'servico')
+            .order_by('horario_agendamento')
+        )
+
+    return render(request, 'painel_terapeuta.html', {
+        'terapeuta': terapeuta,
+        'agendamentos': agendamentos,
+        'data_filtro': data_filtro.isoformat(),
+    })
