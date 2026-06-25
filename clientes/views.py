@@ -1,9 +1,15 @@
 from django.views import View
+from django.views.generic import ListView, DetailView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, Count, Value
+from django.db.models.functions import Replace
+from django.urls import reverse
+
+from servicos.views import AdminStaffRequiredMixin
 from .models import Cliente, Anamnese
-from .forms import CPFForm, NovoCadastroForm, AnamneseForm
+from .forms import CPFForm, NovoCadastroForm, AnamneseForm, ClienteEditForm
 
 
 class IdentificacaoView(View):
@@ -183,3 +189,99 @@ class AnamneseDetailView(LoginRequiredMixin, View):
             'cliente': cliente,
             'anamnese': anamnese,
         })
+
+
+# ---------------------------------------------------------------------------
+# US13 — Gestão e Consulta de Clientes (somente admin)
+# ---------------------------------------------------------------------------
+
+class ClienteListView(AdminStaffRequiredMixin, ListView):
+    """
+    Lista de clientes com busca (nome ou CPF) e paginação configurável.
+    Acesso exclusivo do administrador (LGPD).
+    """
+    model = Cliente
+    template_name = 'gestao_clientes.html'
+    context_object_name = 'clientes'
+
+    OPCOES_POR_PAGINA = [10, 20, 50]
+    DEFAULT_POR_PAGINA = 10
+
+    def get_paginate_by(self, queryset):
+        try:
+            por_pagina = int(self.request.GET.get('por_pagina', self.DEFAULT_POR_PAGINA))
+            if por_pagina in self.OPCOES_POR_PAGINA:
+                return por_pagina
+        except (ValueError, TypeError):
+            pass
+        return self.DEFAULT_POR_PAGINA
+
+    def get_queryset(self):
+        qs = (
+            Cliente.objects
+            .select_related('anamnese')
+            .annotate(
+                num_agendamentos=Count('agendamentos', distinct=True),
+                # CPF só com dígitos, para buscar com ou sem máscara
+                cpf_num=Replace(
+                    Replace(
+                        Replace('cpf', Value('.'), Value('')),
+                        Value('-'), Value('')
+                    ),
+                    Value(' '), Value('')
+                ),
+            )
+            .order_by('nome_completo')
+        )
+
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            condicao = Q(nome_completo__icontains=q)
+            digitos = ''.join(filter(str.isdigit, q))
+            if digitos:
+                condicao |= Q(cpf_num__contains=digitos)
+            qs = qs.filter(condicao)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page_obj = context['page_obj']
+        context['por_pagina']      = self.get_paginate_by(self.get_queryset())
+        context['opcoes_pagina']   = self.OPCOES_POR_PAGINA
+        context['busca']           = self.request.GET.get('q', '')
+        context['indice_inicio']   = page_obj.start_index()
+        context['indice_fim']      = page_obj.end_index()
+        context['total_registros'] = page_obj.paginator.count
+        return context
+
+
+class ClienteDetailView(AdminStaffRequiredMixin, DetailView):
+    """Ficha 360º do cliente: dados, anamnese e histórico de agendamentos."""
+    model = Cliente
+    template_name = 'cliente_detalhe.html'
+    context_object_name = 'cliente'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cliente = self.object
+        context['anamnese'] = getattr(cliente, 'anamnese', None)
+        context['agendamentos'] = (
+            cliente.agendamentos
+            .select_related('servico', 'terapeuta')
+            .order_by('-data_agendamento', '-horario_agendamento')
+        )
+        return context
+
+
+class ClienteUpdateView(AdminStaffRequiredMixin, UpdateView):
+    """Edição do cadastro do cliente (nome, telefone, CPF). Sem exclusão."""
+    model = Cliente
+    form_class = ClienteEditForm
+    template_name = 'editar_cliente.html'
+
+    def get_success_url(self):
+        return reverse('clientes:cliente_detalhe', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Cadastro do cliente atualizado com sucesso!')
+        return super().form_valid(form)

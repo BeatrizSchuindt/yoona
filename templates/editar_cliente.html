@@ -1,0 +1,87 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Editar Cliente | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}" class="ativo"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'clientes:gestao_clientes' %}">Clientes</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <a href="{% url 'clientes:cliente_detalhe' object.pk %}">{{ object.nome_completo }}</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">Editar</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Editar Cliente: <em style="color:var(--gold);font-style:normal;">{{ object.nome_completo }}</em></h1>
+  <a href="{% url 'clientes:cliente_detalhe' object.pk %}" class="btn-admin btn-admin-outline">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card" style="max-width:620px;">
+  <div class="card-header">
+    <h3><i class="fas fa-id-card" style="color:var(--gold);margin-right:0.5rem;"></i>Dados do cliente</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-admin">
+
+        <!-- Nome -->
+        <div class="form-group">
+          <label for="{{ form.nome_completo.id_for_label }}">Nome completo *</label>
+          {{ form.nome_completo }}
+          {% for erro in form.nome_completo.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+        </div>
+
+        <!-- Telefone + CPF -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.telefone.id_for_label }}">Telefone / WhatsApp *</label>
+            {{ form.telefone }}
+            {% for erro in form.telefone.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label for="{{ form.cpf.id_for_label }}">CPF *</label>
+            {{ form.cpf }}
+            {% for erro in form.cpf.errors %}<p class="form-erros">{{ erro }}</p>{% endfor %}
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="form-erros" style="margin-top:1rem;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-acoes">
+          <a href="{% url 'clientes:cliente_detalhe' object.pk %}" class="btn-admin btn-admin-outline">Cancelar</a>
+          <button type="submit" class="btn-admin btn-admin-primario btn-admin-lg">
+            <i class="fas fa-save"></i> Salvar alterações
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

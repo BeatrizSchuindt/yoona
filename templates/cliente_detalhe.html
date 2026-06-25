@@ -1,0 +1,147 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ cliente.nome_completo }} | Yoona Head Spa{% endblock %}
+{% block sidebar_tipo %}Administrador{% endblock %}
+
+{% block sidebar_nav %}
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Gestão</span>
+  <a href="{% url 'servicos:painel_admin' %}"><i class="fas fa-spa"></i> Terapias e Serviços</a>
+  <a href="{% url 'agendamentos:gestao_agenda' %}"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+  <a href="{% url 'agendamentos:gerenciar_bloqueios' %}"><i class="fas fa-calendar-times"></i> Bloqueios de Agenda</a>
+  <a href="{% url 'agendamentos:gestao_vouchers' %}"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+  <a href="{% url 'agendamentos:relatorio_comissoes' %}"><i class="fas fa-file-invoice-dollar"></i> Comissões</a>
+</div>
+<hr class="sidebar-sep">
+<div class="sidebar-nav-grupo">
+  <span class="sidebar-nav-rotulo">Cadastros</span>
+  <a href="{% url 'terapeutas:lista' %}"><i class="fas fa-user-md"></i> Terapeutas</a>
+  <a href="{% url 'clientes:gestao_clientes' %}" class="ativo"><i class="fas fa-users"></i> Clientes</a>
+</div>
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'clientes:gestao_clientes' %}">Clientes</a>
+  <span class="bc-sep"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i></span>
+  <span class="bc-atual">{{ cliente.nome_completo }}</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>{{ cliente.nome_completo }}</h1>
+  <div style="display:flex;gap:0.5rem;">
+    <a href="{% url 'clientes:editar_cliente' cliente.pk %}" class="btn-admin btn-admin-outline">
+      <i class="fas fa-pen"></i> Editar cadastro
+    </a>
+    <a href="{% url 'clientes:gestao_clientes' %}" class="btn-admin btn-admin-outline">
+      <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
+  <!-- Dados cadastrais -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-id-card" style="color:var(--gold);margin-right:0.5rem;"></i>Dados cadastrais</h3>
+    </div>
+    <div class="card-body" style="display:grid;gap:0.75rem;font-size:0.88rem;">
+      <div><span style="color:var(--texto-muted);">Nome:</span> <strong>{{ cliente.nome_completo }}</strong></div>
+      <div><span style="color:var(--texto-muted);">CPF:</span> {{ cliente.cpf }}</div>
+      <div>
+        <span style="color:var(--texto-muted);">Telefone:</span>
+        {% if cliente.telefone_whatsapp %}
+          <a href="https://wa.me/{{ cliente.telefone_whatsapp }}" target="_blank" rel="noopener"
+             style="color:var(--gold);" title="Conversar no WhatsApp">
+            <i class="fab fa-whatsapp"></i> {{ cliente.telefone }}
+          </a>
+        {% else %}
+          {{ cliente.telefone }}
+        {% endif %}
+      </div>
+      <div><span style="color:var(--texto-muted);">Cadastrado em:</span> {{ cliente.data_cadastro|date:"d/m/Y H:i" }}</div>
+    </div>
+  </div>
+
+  <!-- Anamnese -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-notes-medical" style="color:var(--gold);margin-right:0.5rem;"></i>Anamnese</h3>
+    </div>
+    <div class="card-body" style="font-size:0.88rem;">
+      {% if anamnese %}
+        <p style="margin-bottom:1rem;">
+          <span class="badge badge-ativo">Preenchida</span>
+          <span style="color:var(--texto-muted);margin-left:0.5rem;">
+            Atualizada em {{ anamnese.data_atualizacao|date:"d/m/Y H:i" }}
+          </span>
+        </p>
+      {% else %}
+        <p style="margin-bottom:1rem;">
+          <span class="badge badge-inativo">Pendente</span>
+          <span style="color:var(--texto-muted);margin-left:0.5rem;">
+            Cliente ainda não preencheu a ficha.
+          </span>
+        </p>
+      {% endif %}
+      <a href="{% url 'clientes:anamnese_detalhe' cliente.pk %}" target="_blank" rel="noopener"
+         class="btn-admin btn-admin-primario btn-admin-sm">
+        <i class="fas fa-notes-medical"></i> Ver ficha completa
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Histórico de agendamentos -->
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-calendar-check" style="color:var(--gold);margin-right:0.5rem;"></i>Histórico de agendamentos</h3>
+  </div>
+  <div class="table-wrapper">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Horário</th>
+          <th>Serviço</th>
+          <th>Terapeuta</th>
+          <th>Status</th>
+          <th>Valor final</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ag in agendamentos %}
+          <tr>
+            <td>{{ ag.data_agendamento|date:"d/m/Y" }}</td>
+            <td>{{ ag.horario_agendamento|time:"H:i" }}</td>
+            <td>{{ ag.servico.nome }}</td>
+            <td>{{ ag.terapeuta.nome_terapeuta|default:"—" }}</td>
+            <td>
+              {% if ag.status == 'concluido' %}
+                <span class="badge badge-ativo">Concluído</span>
+              {% elif ag.status == 'cancelado' %}
+                <span class="badge badge-inativo">Cancelado</span>
+              {% else %}
+                <span class="badge badge-aguardando">{{ ag.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td>{% if ag.valor_final is not None %}R$ {{ ag.valor_final }}{% else %}—{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="tabela-vazia">
+              <i class="fas fa-calendar-day" style="display:block;font-size:2rem;margin-bottom:0.5rem;color:var(--borda);"></i>
+              Este cliente ainda não possui agendamentos.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

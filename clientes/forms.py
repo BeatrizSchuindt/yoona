@@ -30,6 +30,50 @@ def _cpf_formatado(cpf: str) -> str:
     n = _cpf_digitos(cpf)
     return f'{n[:3]}.{n[3:6]}.{n[6:9]}-{n[9:11]}'
 
+class ClienteEditForm(forms.ModelForm):
+    """
+    Edição do cadastro do cliente pelo admin (US13).
+    CPF validado matematicamente e único; telefone exige DDD.
+    """
+
+    class Meta:
+        model = Cliente
+        fields = ['nome_completo', 'telefone', 'cpf']
+        widgets = {
+            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefone': forms.TextInput(attrs={
+                'class': 'form-control', 'placeholder': '(00) 00000-0000', 'inputmode': 'numeric',
+            }),
+            'cpf': forms.TextInput(attrs={
+                'class': 'form-control', 'placeholder': '000.000.000-00', 'inputmode': 'numeric',
+            }),
+        }
+        error_messages = {
+            'nome_completo': {'required': 'Informe o nome completo do cliente.'},
+            'telefone': {'required': 'Informe o telefone do cliente.'},
+            'cpf': {'required': 'Informe o CPF do cliente.'},
+        }
+
+    def clean_telefone(self):
+        tel = self.cleaned_data.get('telefone', '')
+        digitos = ''.join(filter(str.isdigit, tel))
+        if len(digitos) < 10:
+            raise forms.ValidationError('Informe um telefone válido com DDD.')
+        return tel
+
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf', '')
+        if not _cpf_matematicamente_valido(cpf):
+            raise forms.ValidationError('CPF inválido. Por favor, verifique os números informados.')
+        formatado = _cpf_formatado(cpf)
+        qs = Cliente.objects.filter(cpf=formatado)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('Já existe um cliente cadastrado com este CPF.')
+        return formatado
+
+
 class CPFForm(forms.Form):
     cpf = forms.CharField(
         max_length=14,
