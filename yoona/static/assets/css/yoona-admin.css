@@ -191,7 +191,8 @@ a:hover { color: var(--gold-light); }
 }
 
 .sidebar-footer { padding: 0.75rem 1.5rem 1.25rem; border-top: 1px solid var(--borda-sutil); }
-.sidebar-footer a {
+.sidebar-footer a,
+.sidebar-footer .sidebar-logout-btn {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -199,9 +200,18 @@ a:hover { color: var(--gold-light); }
   font-size: 0.78rem;
   padding: 0.5rem 0;
   transition: color 0.15s;
+  /* reset para o <button> ficar igual ao link */
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
 }
-.sidebar-footer a:hover { color: #ef9a9a; }
-.sidebar-footer a i { width: 15px; text-align: center; }
+.sidebar-footer a:hover,
+.sidebar-footer .sidebar-logout-btn:hover { color: #ef9a9a; }
+.sidebar-footer a i,
+.sidebar-footer .sidebar-logout-btn i { width: 15px; text-align: center; }
 
 /* Overlay mobile */
 .sidebar-overlay {
