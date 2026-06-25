@@ -154,15 +154,6 @@
       {% endblock %}
     </nav>
 
-    <div class="sidebar-footer">
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="sidebar-logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Sair do sistema
-        </button>
-      </form>
-    </div>
-
   </aside>
 
   <!-- OVERLAY MOBILE -->
