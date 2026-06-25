@@ -259,4 +259,4 @@ python manage.py runserver
 
 ---
 
-`<sub>`Projeto acadêmico — Yoona Head Spa · IFMT · Programação Web · 2026/1`</sub>`
+Projeto acadêmico — Yoona Head Spa · IFMT · Programação Web · 2026/1
